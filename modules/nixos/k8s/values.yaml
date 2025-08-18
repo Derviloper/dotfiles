@@ -1,0 +1,6 @@
+global:
+  domain: argocd.derviloper.de
+
+configs:
+  params:
+    server.insecure: true

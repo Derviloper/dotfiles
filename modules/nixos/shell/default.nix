@@ -2,6 +2,7 @@
 {
   environment = {
     systemPackages = with pkgs; [
+      fzf
       zsh-powerlevel10k
       pkgsBuildBuild.ghostty.terminfo
     ];
@@ -14,6 +15,8 @@
     autosuggestions.enable = true;
     syntaxHighlighting.enable = true;
     interactiveShellInit = ''
+      source ${pkgs.fzf}/share/fzf/key-bindings.zsh
+
       source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
 
       if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then

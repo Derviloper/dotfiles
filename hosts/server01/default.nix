@@ -93,6 +93,7 @@
         80
         443
         6443
+        8080
       ];
       allowedUDPPorts = [ ];
       checkReversePath = true;
@@ -108,7 +109,6 @@
   users = {
     users.admin = {
       isNormalUser = true;
-      description = "Admin user";
       extraGroups = [ "wheel" ];
       openssh.authorizedKeys.keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFP5z5uYloIbMG02kin7Sm2XWGvInKT4ZN0JkmCGnVk/ daniel.da-silva@gmx.de"
