@@ -6,14 +6,23 @@
 }:
 {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
     inputs.disko.nixosModules.disko
+    inputs.sops-nix.nixosModules.sops
+    inputs.home-manager.nixosModules.home-manager
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disk-config.nix
     ./hardware-configuration.nix
     ../../modules/nixos/shell
     ../../modules/nixos/k8s
   ];
+
+  sops = {
+    defaultSopsFile = ./sops.yaml;
+    secrets = {
+      "foo" = { };
+      # Usage: config.sops.secrets."foo".path
+    };
+  };
 
   boot.loader.grub = {
     efiSupport = true;
@@ -106,14 +115,12 @@
 
   security.sudo.wheelNeedsPassword = false;
 
-  users = {
-    users.admin = {
-      isNormalUser = true;
-      extraGroups = [ "wheel" ];
-      openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFP5z5uYloIbMG02kin7Sm2XWGvInKT4ZN0JkmCGnVk/ daniel.da-silva@gmx.de"
-      ];
-    };
+  users.users.admin = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILBm+ebJElO2PL4BqWgb/wdM+QZPYshQRDTSwnBGYobz"
+    ];
   };
 
   home-manager = {

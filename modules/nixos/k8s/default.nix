@@ -11,7 +11,10 @@
       hash = "sha256-pIfbHJ4vafOPttJ/4ZupkObWQHl77KeOhFszkc4jkaQ=";
       targetNamespace = "argocd";
       createNamespace = true;
-      values = ./values.yaml;
+      values = {
+        global.domain = "argocd.derviloper.de";
+        configs.params."server.insecure" = true;
+      };
     };
     manifests = {
       traefik.source = ./traefik.yaml;
