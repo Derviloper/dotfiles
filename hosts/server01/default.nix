@@ -137,6 +137,10 @@
     };
 
     settings = {
+      trusted-users = [
+        "root"
+        "@wheel"
+      ];
       max-jobs = 4;
       experimental-features = [
         "nix-command"
