@@ -13,8 +13,8 @@
         targetNamespace = "argocd";
         createNamespace = true;
         values = {
-          global.domain = "argocd.derviloper.de";
-          configs.params."server.insecure" = true;
+          # global.domain = "argocd.derviloper.de";
+          # configs.params."server.insecure" = true;
         };
       };
       sealed-secrets = {
