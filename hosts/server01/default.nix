@@ -17,10 +17,13 @@
   ];
 
   sops = {
-    defaultSopsFile = ./sops.yaml;
+    defaultSopsFile = ./secrets/sops.yaml;
     secrets = {
       "foo" = { };
-      # Usage: config.sops.secrets."foo".path
+      "sealed-secrets-key.yaml" = {
+        sopsFile = ./secrets/sealed-secrets-key.yaml;
+        key = "";
+      };
     };
   };
 

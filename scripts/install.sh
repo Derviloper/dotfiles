@@ -22,8 +22,8 @@ trap cleanup EXIT
 install -d -m755 "$extra_files/etc/ssh"
 
 nix-shell -p sops --run "
-  sops decrypt hosts/$server/ssh_host_ed25519_key > $extra_files/etc/ssh/ssh_host_ed25519_key &&
-  sops decrypt hosts/$server/ssh_host_ed25519_key.pub > $extra_files/etc/ssh/ssh_host_ed25519_key.pub
+  sops decrypt hosts/$server/secrets/ssh_host_ed25519_key > $extra_files/etc/ssh/ssh_host_ed25519_key &&
+  sops decrypt hosts/$server/secrets/ssh_host_ed25519_key.pub > $extra_files/etc/ssh/ssh_host_ed25519_key.pub
 "
 chmod 600 "$extra_files/etc/ssh/ssh_host_ed25519_key"
 chmod 644 "$extra_files/etc/ssh/ssh_host_ed25519_key.pub"
@@ -34,3 +34,12 @@ nix run github:nix-community/nixos-anywhere -- \
   --extra-files "$extra_files" \
   --flake .#"$server" \
   --target-host "$target_host"
+
+hostname=$(ssh -G "$server" | awk '/^hostname / { print $2 }')
+
+until nc -z "$hostname" 22 2>/dev/null; do
+  sleep 1
+done
+
+ssh-keygen -R "$hostname"
+ssh-keyscan -H "$hostname" >> ~/.ssh/known_hosts
