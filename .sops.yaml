@@ -2,7 +2,8 @@ keys:
   - &admin age10aguczvsc0uzlqpqgrrlt2qp5m28sczh2228tpa5uyv223de7p9qnc3s9j
   - &server01 age1v0m34gqqk36xgzlh8m22n6ulggzakjtgcer0wn6nw7y20tmsgywqfau3q0
 creation_rules:
-  - key_groups:
+  - path_regex: .*\/server01\/.*
+    key_groups:
       - age:
           - *admin
           - *server01
