@@ -10,7 +10,7 @@ spec:
     targetRevision: HEAD
     path: kubernetes
     directory:
-      include: "*/*"
+      recurse: true
       exclude: "values.yaml"
 
   destination:
