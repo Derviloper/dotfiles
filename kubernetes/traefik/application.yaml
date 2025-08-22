@@ -7,13 +7,19 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: https://traefik.github.io/charts
-    chart: traefik
-    targetRevision: 37.0.0
-    helm:
-      valueFiles:
-        - values.yaml
+  sources:
+    - repoURL: https://traefik.github.io/charts
+      chart: traefik
+      targetRevision: 37.0.0
+      helm:
+        valueFiles:
+          - $values/kubernetes/traefik/values.yaml
+    - repoURL: https://github.com/Derviloper/dotfiles.git
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/Derviloper/dotfiles.git
+      targetRevision: HEAD
+      path: kubernetes/traefik/cloudflare-api-secret.yaml
 
   destination:
     server: "https://kubernetes.default.svc"
