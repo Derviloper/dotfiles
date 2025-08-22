@@ -67,7 +67,7 @@ gateway:
 
 logs:
   general:
-    level: INFO
+    level: TRACE
 
   access:
     enabled: true
