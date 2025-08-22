@@ -2,7 +2,6 @@ ports:
   web:
     port: 80
     nodePort: 30000
-
     redirections:
       entryPoint:
         to: websecure
@@ -34,7 +33,7 @@ extraObjects:
     type: kubernetes.io/basic-auth
     stringData:
       username: admin
-      password: "P@ssw0rd"
+      password: "P@ssw0rd" # TODO: Replace with an Actual Password
   - apiVersion: traefik.io/v1alpha1
     kind: Middleware
     metadata:
@@ -57,12 +56,14 @@ gateway:
     web:
       port: 80
       protocol: HTTP
-      namespacePolicy: All
+      namespacePolicy:
+        from: All
 
     websecure:
       port: 443
       protocol: HTTPS
-      namespacePolicy: All
+      namespacePolicy:
+        from: All
       mode: Terminate
 
 logs:
