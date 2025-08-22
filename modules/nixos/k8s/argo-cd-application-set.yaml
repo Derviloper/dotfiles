@@ -8,8 +8,9 @@ spec:
   source:
     repoURL: https://github.com/Derviloper/dotfiles.git
     targetRevision: HEAD
+    path: kubernetes
     directory:
-      include: "kubernetes/*/*"
+      include: "*/*"
       exclude: "values.yaml"
 
   destination:
