@@ -11,9 +11,15 @@ spec:
     repoURL: https://traefik.github.io/charts
     chart: traefik
     targetRevision: 37.0.0
-    # helm:
-    #   valueFiles:
-    #     - values.yaml
+    helm:
+      valueFiles:
+        - $values/values.yaml
+
+  sources:
+    - repoURL: https://github.com/Derviloper/dotfiles.git
+      targetRevision: HEAD
+      path: kubernetes/traefik
+      ref: values
 
   destination:
     server: "https://kubernetes.default.svc"
