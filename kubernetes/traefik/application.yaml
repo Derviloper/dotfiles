@@ -1,19 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: traefik-traefik
+  name: traefik
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: https://traefik.github.io/charts
-    chart: traefik
-    targetRevision: 37.0.0
-    helm:
-      valuesFiles:
-        - values.yaml
+  sources:
+    - repoURL: https://traefik.github.io/charts
+      chart: traefik
+      targetRevision: 37.0.0
+      helm:
+        valuesFiles:
+          - $values/values.yaml
+    - repoURL: https://github.com/Derviloper/dotfiles.git
+      targetRevision: HEAD
+      path: kubernetes/traefik
+      ref: values
 
   destination:
     server: "https://kubernetes.default.svc"

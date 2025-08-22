@@ -1,36 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
+kind: Application
 metadata:
-  name: application-set
+  name: applications
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
-  goTemplate: true
-  goTemplateOptions: ["missingkey=error"]
-  generators:
-    - git:
-        repoURL: https://github.com/Derviloper/dotfiles.git
-        revision: HEAD
-        directories:
-          - path: kubernetes/*
-  template:
-    metadata:
-      name: "{{.path.basename}}"
-      finalizers:
-        - resources-finalizer.argocd.argoproj.io
-    spec:
-      project: "default"
-      source:
-        repoURL: https://github.com/Derviloper/dotfiles.git
-        targetRevision: HEAD
-        path: "{{.path.path}}"
-      destination:
-        server: https://kubernetes.default.svc
-        namespace: "{{.path.basename}}"
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
-        syncOptions:
-          - CreateNamespace=true
+  project: default
+  source:
+    repoURL: https://github.com/Derviloper/dotfiles.git
+    targetRevision: HEAD
+    path: kubernetes
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
