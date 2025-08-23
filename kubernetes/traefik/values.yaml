@@ -79,3 +79,10 @@ env:
 
 persistence:
   enabled: true
+  name: data
+  existingClaim: ""
+  accessMode: ReadWriteOnce
+  size: 128Mi
+  storageClass: ""
+  volumeName: ""
+  path: /data
