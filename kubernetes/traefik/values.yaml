@@ -62,7 +62,7 @@ logs:
   access:
     enabled: true
 
-certificatesresolvers:
+certificatesResolvers:
   letsencrypt:
     acme:
       email: "daniel.da-silva@gmx.de"
@@ -76,12 +76,6 @@ env:
       secretKeyRef:
         name: cloudflare-api-secret
         key: api-token
-# persistence:
-#   enabled: true
-#   name: data
-#   existingClaim: ""
-#   accessMode: ReadWriteOnce
-#   size: 1Gi
-#   storageClass: ""
-#   volumeName: ""
-#   path: /data
+
+persistence:
+  enabled: true
