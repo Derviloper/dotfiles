@@ -19,7 +19,7 @@ spec:
       ref: values
     - repoURL: https://github.com/Derviloper/dotfiles.git
       targetRevision: HEAD
-      path: kubernetes/traefik/cloudflare-api-secret.yaml
+      path: kubernetes/traefik
 
   destination:
     server: "https://kubernetes.default.svc"
