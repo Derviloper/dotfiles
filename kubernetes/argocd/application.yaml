@@ -7,10 +7,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: https://github.com/Derviloper/dotfiles.git
-    targetRevision: HEAD
-    path: kubernetes/argocd
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 8.3.0
+      helm:
+        valueFiles:
+          - $values/kubernetes/argocd/values.yaml
+    - repoURL: https://github.com/Derviloper/dotfiles.git
+      targetRevision: HEAD
+      ref: values
 
   destination:
     server: "https://kubernetes.default.svc"
