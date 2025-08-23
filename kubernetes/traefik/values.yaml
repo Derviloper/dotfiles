@@ -82,7 +82,7 @@ persistence:
   name: data
   existingClaim: ""
   accessMode: ReadWriteOnce
-  size: 128Mi
+  size: 1Gi
   storageClass: ""
   volumeName: ""
   path: /data
