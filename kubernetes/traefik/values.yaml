@@ -76,13 +76,12 @@ env:
       secretKeyRef:
         name: cloudflare-api-secret
         key: api-token
-
-persistence:
-  enabled: true
-  name: data
-  existingClaim: ""
-  accessMode: ReadWriteOnce
-  size: 1Gi
-  storageClass: ""
-  volumeName: ""
-  path: /data
+# persistence:
+#   enabled: true
+#   name: data
+#   existingClaim: ""
+#   accessMode: ReadWriteOnce
+#   size: 1Gi
+#   storageClass: ""
+#   volumeName: ""
+#   path: /data
