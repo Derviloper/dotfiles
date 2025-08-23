@@ -17,14 +17,6 @@
           # configs.params."server.insecure" = true;
         };
       };
-      # sealed-secrets = {
-      #   name = "sealed-secrets";
-      #   repo = "https://bitnami-labs.github.io/sealed-secrets";
-      #   version = "2.17.4";
-      #   hash = "sha256-a3wz32MJ1sPmCRiY9BlXuunhP0XlW8nolZNye1+AERE=";
-      #   targetNamespace = "sealed-secrets";
-      #   createNamespace = true;
-      # };
     };
     manifests = {
       sealed-secret-key.source = "${config.sops.secrets."sealed-secrets-key.yaml".path}";

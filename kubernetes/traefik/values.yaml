@@ -9,12 +9,11 @@ ports:
         permanent: true
 
   websecure:
+    asDefault: true
     port: 443
     nodePort: 30001
-
-api:
-  dashboard: true
-  insecure: false
+    tls:
+      certResolver: "le"
 
 ingressRoute:
   dashboard:
@@ -26,6 +25,20 @@ ingressRoute:
       - name: dashboard-auth
 
 extraObjects:
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      creationTimestamp: null
+      name: cloudflare-api-secret
+      namespace: traefik
+    spec:
+      encryptedData:
+        api-token: AgB4MLiGOs06J93RZwqOFvHInoyggF35fOIZn7G7v0ZeC2RsAQVys1pJmsdV3Np4EIvefVXoj4d3YpCSgM4mSuXfJSY5ssgy4xC5disLND1UrWeL4CkQs3i4tn2MJwO07Mi7uj3Ae8f3cjWiiHP6iEQyYK+mtpK5LlGden0DypCAua128ATJGimo2ZLjmQg60AZeC5Sud39eHKawxPY2/sMAeW3YLIhKyeeMzapE7op7CAPJUupNf3DGIJk+6ASDaaWEHH/QF08IQ9TFB05ioALkaNAnfWdfk9t+thi9nX6ji88KEz536gA6jUOiMwBaH7ryyxxUVcSIpKSsNi8QWNSI69bd9PqoN65N05oF/3v2zWGfaOfq4L25OtZAqHOYqyXRcYW1wOQPAnY3KRzPzE2Yjr3/d/wCdvTVkoUJhqs0hXA8GasXJPqokK0lYxUD56R8MwM1+C3AgP4pH5j0lBpa2XMyR9GpXeMRb0nH/LqH7uYZ0hRorP6qgtxsg4oe2zUv//ZyzpJauG/fibPXDKmGO5AE/vjMscl+rrVmKVGopYj5xxSm6yXQT3agj71juz9RY7NLX+yjlwjoOaDkv2nqdSWPun6dkjXgAq6oyDqjNMOJHqH7MnZnJqE/2zjVvgG+Tk6CHtcjsemm+zLieIShT1s/uyAOpEpBrhjTgNeS2iAQunwqVQNSdpCGF4h1orQ/DSHfwlxK2q0R24NaGt2U0bK2Zg87+Jz4rvMZiG+kjkjpr/DCDcnN/g==
+      template:
+        metadata:
+          creationTimestamp: null
+          name: cloudflare-api-secret
+          namespace: traefik
   - apiVersion: v1
     kind: Secret
     metadata:

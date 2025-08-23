@@ -17,9 +17,6 @@ spec:
     - repoURL: https://github.com/Derviloper/dotfiles.git
       targetRevision: HEAD
       ref: values
-    - repoURL: https://github.com/Derviloper/dotfiles.git
-      targetRevision: HEAD
-      path: kubernetes/traefik
 
   destination:
     server: "https://kubernetes.default.svc"
