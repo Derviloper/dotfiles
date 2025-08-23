@@ -1,6 +1,10 @@
 global:
   domain: argocd.derviloper.de
 
+configs:
+  params:
+    server.insecure: true
+
 extraObjects:
   - apiVersion: traefik.io/v1alpha1
     kind: IngressRoute
