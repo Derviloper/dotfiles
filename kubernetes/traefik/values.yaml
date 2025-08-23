@@ -13,7 +13,7 @@ ports:
     port: 443
     nodePort: 30001
     tls:
-      certResolver: "le"
+      certResolver: letsencrypt
 
 ingressRoute:
   dashboard:
@@ -67,7 +67,7 @@ metrics:
     enabled: true
 
 certificatesresolvers:
-  le:
+  letsencrypt:
     acme:
       email: "daniel.da-silva@gmx.de"
       storage: "/data/acme.json"

@@ -4,8 +4,6 @@ metadata:
   name: argocd-server
   namespace: argocd
 spec:
-  entryPoints:
-    - websecure
   routes:
     - kind: Rule
       match: Host(`argocd.derviloper.de`)
@@ -20,5 +18,3 @@ spec:
         - name: argocd-server
           port: 80
           scheme: h2c
-  tls:
-    certResolver: le
