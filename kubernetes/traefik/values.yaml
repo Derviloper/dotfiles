@@ -62,10 +62,6 @@ logs:
   access:
     enabled: true
 
-metrics:
-  prometheus:
-    enabled: true
-
 certificatesresolvers:
   letsencrypt:
     acme:
@@ -83,6 +79,3 @@ env:
 
 persistence:
   enabled: true
-  name: data
-  size: 1Gi
-  storageClass: ""
