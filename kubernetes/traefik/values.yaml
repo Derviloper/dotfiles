@@ -43,7 +43,7 @@ extraObjects:
     kind: SealedSecret
     metadata:
       creationTimestamp: null
-      name: dashboard-auth-sealed-secret
+      name: dashboard-auth-secret
       namespace: traefik
     spec:
       encryptedData:
