@@ -39,14 +39,21 @@ extraObjects:
           creationTimestamp: null
           name: cloudflare-api-secret
           namespace: traefik
-  - apiVersion: v1
-    kind: Secret
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
     metadata:
+      creationTimestamp: null
       name: dashboard-auth-secret
-    type: kubernetes.io/basic-auth
-    stringData:
-      username: admin
-      password: "P@ssw0rd" # TODO: Replace with an Actual Password
+      namespace: traefik
+    spec:
+      encryptedData:
+        password: AgA0zGNKTxyUxWyRqpqY6kaEi52+UTuH4rEt2tDXVS1kEzYze8xZeamwPjPTsSOPJZ6pYFQqmdiZP9HpCfpQmbdT7kN2SlX5A0ZCbBC43UvkCI9+gABzm6TLSaru+DZarD8Iers/SkcqtEtpE5vrpoLcfBX0OrTD74ZpyV6lRsBSz55ib1zKe7TcCU/afDQik538Kr9Kr45SvIqELZ3gZsKxviupwnth+JMeqce8IjeICh0dp1iQWxSBH5SpOwDPSsjkdq+rmXvxn2/oyhfoLsbeZh/iB+Two4tyL6LnL31szrysUQkGqMQoCdorxFyeT4p2vzQZUwaGooFnpJY0MgJG/0F3mirvoAYguZAy+mubq0EP4LZDYCG+Aj2H5pY4JivUq+SXxR8smDbgaXATcfk/pr19/oM0Ped8wR4Zi9OWIMCpWWWb8KygvC2rJeh23BSjlqIK4fmpQG8ZFn5cfTfP0FlcL04jds/lO1HuVKkCC40HQslwC3Apy75AYVyhuEYp3nQDR1Hq3xPSlonii5cMd5Wd80B2GJ2zbja6poiggGXtpiAZydLPQ6lIOLHxi56Bv/ITn2kdbUI1dR0I93YY9pFNOSHL2H+W8PX/48MLi6Oh27K4bE6TN0vMDbS9ia3II5WunDhpHaRF0HnEOkN256wqNWPu+hHzSQnOmgXEiQlX+E2hb5+PSy0DOf4iBqMYGsxs5DUcdIrr3rooRHa8KvXuTSpwbZ7w/wTYLFadUw==
+        username: AgB+hibitFDoFXM8xuTJJ9RCbCzTZPG//ZViVDkuxsKvwqeyt+1+qF9Dv2UOGju/fhGtoxOzf2lHEgZTu0KLvzEdYJNyNm7S09e7ZH+MZLT93wkPkFigiL/X1CdPT8MW+h4JDtOts3ylWS0SwCFTKNHGk4c8ZdphzkrYh1cPQOSsh8YfQN9qCKcWwCD3VDVLPnc56VOgPgqCYtulcmwjSpdQaeCEPWnblRL1C0MRZJTWmhlPmVc5fiMMyhUanJZDnWowldtd8N0HYpNdpDa5Tm3FWr3TCcQyakEEFbHUkE59ooaXx6VBvCQNBsDFdVgYITO1qCGhISIJfBjKJ2I51+g5qisuPvE0FloaogG9QbNvwlasHwkJFQjUbX1CM9f/WtggnoG1w9D0R8G89rMvxXK8fGhczzoiFQavWja/QELozgXBOZGq2DJMBjcWZ2ETtnr1gZmNHT0Iz9JaPsVo906mjvijQwFi8ZbANpiNoGn+0F4eALu/FT7Bs/ygabWz+wVNiP9v1+lx0tmew+lVoSnCTJ6QojLZVjSjsBSULzIfavXI+Y4dmmQ+KN5kokh7/U82eZs0qVeSjFbe+ofxDvKLNYHxUMF5pEzTLlO52lTFd7rmQuItdvOHG6JsHbDas9WHnaVSMmN/J1VJPeWERnTIgN41U711KiJa4ye1aLAWYRb6xAP212/V7iT54DhMBHsCPUwUZg==
+      template:
+        metadata:
+          creationTimestamp: null
+          name: dashboard-auth-secret
+          namespace: traefik
   - apiVersion: traefik.io/v1alpha1
     kind: Middleware
     metadata:
