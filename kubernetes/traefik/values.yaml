@@ -139,3 +139,7 @@ env:
 
 persistence:
   enabled: true
+
+service:
+  spec:
+    externalTrafficPolicy: Local
