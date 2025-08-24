@@ -114,11 +114,9 @@ extraObjects:
         secret: dashboard-auth-secret
 
 logs:
-  general:
-    level: TRACE
-
   access:
     enabled: true
+    format: json
 
 certificatesResolvers:
   letsencrypt:
