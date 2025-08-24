@@ -18,12 +18,11 @@ err() {
 
 # Prompt for hidden secret input
 read_secret() {
-    local prompt="$1"
-    local secret_value
-    read -rsp "$prompt" secret_value
-    echo    # move to next line after input
-    [[ -n "$secret_value" ]] || err "Secret value cannot be empty"
-    echo "$secret_value"
+    local prompt="$1" secret_value
+    printf "%s" "$prompt" >&2
+    IFS= read -r -s secret_value
+    printf "\n" >&2
+    printf "%s" "$secret_value"
 }
 
 # Prompt with default
