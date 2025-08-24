@@ -14,6 +14,10 @@ ports:
     nodePort: 30001
     tls:
       certResolver: letsencrypt
+      domains:
+        - main: derviloper.de
+          sans:
+            - "*.derviloper.de"
 
 ingressRoute:
   dashboard:
@@ -75,10 +79,6 @@ certificatesResolvers:
       storage: "/data/acme.json"
       dnschallenge:
         provider: "cloudflare"
-      domains:
-        - main: derviloper.de
-          sans:
-            - "*.derviloper.de"
 
 env:
   - name: CF_DNS_API_TOKEN
