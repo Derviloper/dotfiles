@@ -6,6 +6,7 @@ configs:
     server.insecure: true
   secret:
     argocdServerAdminPassword: "$2a$10$tmPDH5rmzDa8WQgaHVvqDOHwN8D.SyvUNtz9IJlknaLPwIQWz9s16"
+    argocdServerAdminPasswordMtime: "2025-08-24T12:00:00+00:00"
 
 extraObjects:
   - apiVersion: traefik.io/v1alpha1
