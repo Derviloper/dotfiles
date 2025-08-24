@@ -75,6 +75,10 @@ certificatesResolvers:
       storage: "/data/acme.json"
       dnschallenge:
         provider: "cloudflare"
+      domains:
+        - main: derviloper.de
+          sans:
+            - "*.derviloper.de"
 
 env:
   - name: CF_DNS_API_TOKEN
