@@ -3,7 +3,7 @@ extras:
     - apiVersion: traefik.io/v1alpha1
       kind: IngressRoute
       metadata:
-        name: kubernetes-dashboard-server
+        name: kubernetes-dashboard
         namespace: kubernetes-dashboard
       spec:
         routes:
@@ -12,10 +12,4 @@ extras:
             priority: 10
             services:
               - name: kubernetes-dashboard-kong-proxy
-                port: 80
-
-app:
-  ingress:
-    enabled: true
-  tls:
-    enabled: false
+                port: 443
