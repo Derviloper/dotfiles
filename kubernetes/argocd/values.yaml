@@ -2,13 +2,29 @@ global:
   domain: argocd.derviloper.de
 
 configs:
+  cm:
+    exec.enabled: true
   params:
     server.insecure: true
   secret:
-    argocdServerAdminPassword: "$2a$10$tmPDH5rmzDa8WQgaHVvqDOHwN8D.SyvUNtz9IJlknaLPwIQWz9s16"
-    argocdServerAdminPasswordMtime: "2025-08-24T12:00:00Z"
+    createSecret: false
 
 extraObjects:
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      creationTimestamp: null
+      name: argocd-secret
+      namespace: argocd
+    spec:
+      encryptedData:
+        admin.password: AgAJbW34mFmjtROYPHT9H/7k2rweDUKXSVtM1mL2D8PDgJ7lAfg+khsmHmsJagnb+Ae2pA2LwvrVZnqNKW+md+kuhEVf/9+xqoXHWlyl3jmAW/uRdxT/JU6+fU4aGl6CeWaBJ20MYSAEJKf4AgCrlAgANel54Sn6PgBAY+Oph+ss79maJI3UDVAJe8WnPYVSLKhQAujGSapr71a91+PeuCsQFspZT82Kc4kpuc1OZswnZmFvK9T+7dpEeIzf07UVaXVxYjekJ6B50PhPPw+Ul8maS/+fZHUjZiNNa7ZGmukke9ZqfqHpCawCi6pFnL2Vce/FldweQA3pe8Ek4NcgC7PSFgvjRf8HkaERszavF+EnR5smdU3hwUn1IcSrDIe4pfS6PD+GLRed1I4oX22D8pSZ7y2cdRTnKBpGZ284FnKeaZfzehMRu1k1XW20TXHxkVZs4jBYsROILVwGPOnIwxMdqXizRAK1b3ZR7QH+cenQLm2hvZN4I20RQFwXF1O/lkzoeETtSFDNDrPXJPuRGVjvh/3TH7xYafW03Ry/8jUopG9r9MBqGj6Jk/Nys/lUJaHqRsSRsGTKh8G3DWIFW0akGeMfNhDrdK9YwMFdHRNYjrCyZyJSYhIqsNzzXHnBenActNHpUaubx3CF8HVH61r9JRYqqlWCNHigjaSyGfhucs5vATmrsw7gx3QwtXuWV2kcO09JkqHheD64v4YiyCTMkgCknatfnTGTFy16cn6DhtzeD5PRxiQTOFWrw6t+5dJ+KcrG6gqMLSG1D6A=
+        admin.passwordMtime: AgAWoUkCFv8W663JMoyUfcuYqS9Ma36A63w+JLnPdvVWUKdQhotXVLckRgs3MLo+UMXhg1DoVF/59VnmTwAn53gY5lSznHLNfTHma/pxsykKDvYnLNDKVIFiubj5WLmMysK6Rzvb8Q0w76W5yva24dU5QU+HTp6Sb4ZfzI2mXzF1iulcFUFUkUR+ePA2S08sU7Pf/xT50mUD39FfGnQ6BZIuSOICx/0LzSYjco6XWL2pG/SyKWW5kuy/WDGpCyQQJlz0MwPepehpob3PBGZ9s/jHeomnoSwPH1QzQ2n/t1EoKCCOuFate8/ctKLly13URHjAHBNvjb1ipANo+tsbVvUHaTNrYMZAyoVAE2FnjkYrbBTF39ww+yloKoBYcn4ij2Vb4xhuEkahRAStuaWD6CUbG87kjEQs3TS0rXiQG8x16gODti5EZXjGsejnbvIG9XvzWcOKBLHwWZuHB5LMn4Xb8RWTsqSfA+3HqLJ+QnhYkbs3RjTOO/zLJ3CfRmPTVg248gup8uG1IJTJd7pwZftyR4tjX10gUS4YdCGpR6iRKtJxZ5/AyyTP1JNH1eSz9rjiybPyvP1shcR3bzzFYH/4wPctf5+w3EwaoI4yxZsnxvj5oaTL69JmcbEFA0owMsqtE5b7ng171teeJSr8X3jbbh9lrSUdcFcs67jeKZZvsbJtgXfkp4kgRbpuly44RKeRPQYUqyTIhE+Xb6z1KFShoU85cw==
+      template:
+        metadata:
+          creationTimestamp: null
+          name: argocd-secret
+          namespace: argocd
   - apiVersion: traefik.io/v1alpha1
     kind: IngressRoute
     metadata:
