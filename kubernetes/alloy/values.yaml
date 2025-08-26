@@ -1,0 +1,11 @@
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  hosts:
+    - alloy.derviloper.de
+
+grafana:
+  url: http://kube-prometheus-stack-grafana.kube-prometheus-stack.svc.cluster.local
+
+loki:
+  url: http://loki.loki.svc.cluster.local:3100
