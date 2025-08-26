@@ -1,0 +1,19 @@
+loki:
+  config:
+    auth_enabled: false
+    server:
+      http_listen_port: 3100
+
+  singleBinary:
+    enabled: true
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClassName: "standard"
+
+grafana:
+  enabled: true
+
+minio:
+  enabled: true

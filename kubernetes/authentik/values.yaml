@@ -1,0 +1,18 @@
+authentik:
+  secret_key: "sfmM34+q2rpT0EYxohREHoc4xy0djeF9bOh45iv8M4iDC7oZ38mkPKDcoF3zZ4UMQzlYF4cS6RWjp3xR"
+  postgresql:
+    password: "jBp0kkVMHI06YwFy518ySD9Pusz1bDDEHdUaLjEETYX9yl6r6BLJJUqtBd3b8cKbQ1dEckto0y/l9BEF"
+
+server:
+  ingress:
+    ingressClassName: traefik
+    enabled: true
+    hosts:
+      - authentik.derviloper.de
+
+postgresql:
+  enabled: true
+  auth:
+    password: "jBp0kkVMHI06YwFy518ySD9Pusz1bDDEHdUaLjEETYX9yl6r6BLJJUqtBd3b8cKbQ1dEckto0y/l9BEF"
+redis:
+  enabled: true
