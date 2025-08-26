@@ -12,6 +12,7 @@
         hash = "sha256-pIfbHJ4vafOPttJ/4ZupkObWQHl77KeOhFszkc4jkaQ=";
         targetNamespace = "argocd";
         createNamespace = true;
+        values.configs.secret.createSecret = false;
       };
     };
     manifests = {
