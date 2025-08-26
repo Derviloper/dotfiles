@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
+      chart: kube-prometheus-stack
+      targetRevision: 77.0.1
+      helm:
+        valueFiles:
+          - $values/kubernetes/kube-prometheus-stack/values.yaml
+    - repoURL: https://github.com/Derviloper/dotfiles.git
+      targetRevision: HEAD
+      ref: values
+
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: kube-prometheus-stack
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
