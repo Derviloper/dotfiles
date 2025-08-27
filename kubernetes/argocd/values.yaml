@@ -8,6 +8,8 @@ configs:
     server.insecure: true
   secret:
     createSecret: false
+    annotations:
+      "sealedsecrets.bitnami.com/managed": "true"
 
 extraObjects:
   - apiVersion: bitnami.com/v1alpha1
