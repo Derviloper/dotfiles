@@ -44,4 +44,3 @@ It is structured around [flakes](https://nixos.wiki/wiki/Flakes) and integrates 
 - Simplify deployment and secret management
 - Expand cross-platform support (NixOS + macOS)
 - Provide a foundation for a personal homelab and developer workflow
-  .
