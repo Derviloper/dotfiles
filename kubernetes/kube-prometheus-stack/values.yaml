@@ -13,4 +13,9 @@ grafana:
           access: proxy
           url: http://loki.loki.svc.cluster.local:3100
 nodeExporter:
-  hostNetwork: false
+  hostNetwork: true
+  serviceMonitor:
+    enabled: true
+    interval: "15s"
+  hostPort:
+    enabled: true
