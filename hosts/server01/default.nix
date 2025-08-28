@@ -107,10 +107,10 @@
         8080 # testing
       ];
       allowedUDPPorts = [ ];
-      extraInputRules = [
-        "ip saddr 10.42.0.0/16 accept"
-        "ip saddr 10.43.0.0/16 accept"
-      ];
+      extraInputRules = ''
+        ip saddr 10.42.0.0/16 accept
+        ip saddr 10.43.0.0/16 accept
+      '';
     };
 
     nftables.enable = true;
