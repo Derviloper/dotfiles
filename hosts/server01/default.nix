@@ -99,16 +99,18 @@
     hostName = "server01";
 
     firewall = {
-      enable = true;
       allowedTCPPorts = [
-        22
-        80
-        443
-        6443
-        8080
+        22 # ssh
+        80 # http
+        443 # https
+        6443 # Kubernetes API Server
+        8080 # testing
       ];
       allowedUDPPorts = [ ];
-      checkReversePath = true;
+      extraInputRules = [
+        "ip saddr 10.42.0.0/16 accept"
+        "ip saddr 10.43.0.0/16 accept"
+      ];
     };
 
     nftables.enable = true;
