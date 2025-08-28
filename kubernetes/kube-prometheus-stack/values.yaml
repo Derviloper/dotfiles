@@ -13,9 +13,14 @@ grafana:
           access: proxy
           url: http://loki.loki.svc.cluster.local:3100
 nodeExporter:
+  # create a ClusterIP service for DNS-based scraping
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 9100
   hostNetwork: true
+  hostPort:
+    enabled: true
   serviceMonitor:
     enabled: true
     interval: "15s"
-  hostPort:
-    enabled: true
