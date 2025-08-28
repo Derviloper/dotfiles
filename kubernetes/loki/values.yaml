@@ -19,6 +19,9 @@ loki:
     enable_api: true
   auth_enabled: false
 
+chunksCache:
+  allocatedMemory: 2048
+
 minio:
   enabled: true
 
