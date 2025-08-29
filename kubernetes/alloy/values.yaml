@@ -3,3 +3,7 @@ ingress:
   ingressClassName: traefik
   hosts:
     - alloy.derviloper.de
+
+alloy:
+  configMap:
+    content: ""

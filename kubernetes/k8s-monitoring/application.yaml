@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: alloy
+  name: k8s-monitoring
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -9,18 +9,18 @@ spec:
   project: default
   sources:
     - repoURL: https://grafana.github.io/helm-charts
-      chart: alloy
-      targetRevision: 1.2.1
+      chart: k8s-monitoring
+      targetRevision: 3.3.2
       helm:
         valueFiles:
-          - $values/kubernetes/alloy/values.yaml
+          - $values/kubernetes/k8s-monitoring/values.yaml
     - repoURL: https://github.com/Derviloper/dotfiles.git
       targetRevision: HEAD
       ref: values
 
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: alloy
+    namespace: k8s-monitoring
 
   syncPolicy:
     automated:
