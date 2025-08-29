@@ -27,9 +27,13 @@
     };
   };
 
-  boot.loader.grub = {
-    efiSupport = true;
-    efiInstallAsRemovable = true;
+  boot = {
+    loader.grub = {
+      efiSupport = true;
+      efiInstallAsRemovable = true;
+    };
+
+    kernel.sysctl."fs.inotify.max_user_watches" = 524288;
   };
 
   time.timeZone = "Etc/UTC";
