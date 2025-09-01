@@ -33,7 +33,10 @@
       efiInstallAsRemovable = true;
     };
 
-    kernel.sysctl."fs.inotify.max_user_watches" = 524288;
+    kernel.sysctl = {
+      "fs.inotify.max_user_instances" = 524288;
+      "fs.inotify.max_user_watches" = 524288;
+    };
   };
 
   time.timeZone = "Etc/UTC";
