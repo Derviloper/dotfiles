@@ -1,13 +1,6 @@
 authentik:
   enabled: false
 
-server:
-  ingress:
-    ingressClassName: traefik
-    enabled: true
-    hosts:
-      - authentik.derviloper.de
-
 postgresql:
   enabled: true
   auth:
@@ -49,3 +42,16 @@ additionalObjects:
           creationTimestamp: null
           name: authentik
           namespace: authentik
+  - apiVersion: traefik.io/v1alpha1
+    kind: IngressRoute
+    metadata:
+      name: authentik-server
+      namespace: authentik
+    spec:
+      routes:
+        - kind: Rule
+          match: Host(`authentik.derviloper.de`)
+          priority: 10
+          services:
+            - name: authentik-server
+              port: 80
