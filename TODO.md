@@ -1,5 +1,3 @@
-- Disable metrics-server and deploy with argocd (test kubernetes-dashboard deletion afterwards)
-- Fix Grafana, Loki, Alloy
 - Configure Authentik
 - Configure GitHub SSO for all possible applications (with authentik traefik forward auth middleware)
 - Deploy Polaris
