@@ -6,11 +6,13 @@ additionalObjects:
     kind: Database
     metadata:
       name: authentik-postgresql-database
+      namespace: authentik
     spec:
       databaseReclaimPolicy: delete
       name: authentik
       owner: authentik
       cluster:
+        namespace: postgresql
         name: postgresql-cluster
   - apiVersion: bitnami.com/v1alpha1
     kind: SealedSecret

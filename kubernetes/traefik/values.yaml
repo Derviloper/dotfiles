@@ -109,6 +109,7 @@ extraObjects:
     kind: Middleware
     metadata:
       name: dashboard-auth
+      namespace: traefik
     spec:
       basicAuth:
         secret: dashboard-auth-secret
