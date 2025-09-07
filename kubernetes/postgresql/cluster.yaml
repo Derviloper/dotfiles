@@ -11,3 +11,8 @@ spec:
 
   monitoring:
     enablePodMonitor: true
+
+  managed:
+    roles:
+      - name: authentik
+        login: true
