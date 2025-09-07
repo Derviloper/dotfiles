@@ -16,7 +16,8 @@ spec:
     roles:
       - name: authentik
         ensure: present
+        passwordSecret:
+          name: authentik-postgresql-secret
         connectionLimit: -1
         inherit: true
-        disablePassword: true
         login: true
