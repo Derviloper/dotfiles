@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: postgres
+  name: postgresql
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -13,17 +13,17 @@ spec:
       targetRevision: 0.26.0
       helm:
         valueFiles:
-          - $values/kubernetes/postgres/values.yaml
+          - $values/kubernetes/postgresql/values.yaml
     - repoURL: https://github.com/Derviloper/dotfiles.git
       targetRevision: HEAD
       ref: values
     - repoURL: https://github.com/Derviloper/dotfiles.git
       targetRevision: HEAD
-      path: kubernetes/postgres
+      path: kubernetes/postgresql
 
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: postgres
+    namespace: postgresql
 
   syncPolicy:
     automated:
