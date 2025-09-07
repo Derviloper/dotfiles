@@ -1,2 +1,22 @@
+auth:
+  existingSecret: redis-secret
+  existingSecretPasswordKey: password
+
 replica:
   replicaCount: 1
+
+extraDeploy:
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      creationTimestamp: null
+      name: redis-secret
+      namespace: redis
+    spec:
+      encryptedData:
+        password: AgA5oNQiv6N0KN2W1mvh1iwYpKg5H+P5Jh3EHchyPWEnXcYNlBh9wo6bbsvH4OxS5eGbqB9ZuuP0NHfuddffiyiNzmeOFaDxwwEhqYcnv6GfeZGJIcbwmlqwpIe5ub4lNAcktBhlrEeJCWlSfwvurBcH5tkHMaKKh3FbRCMgTxZcB7FlLL9Nz6sFCVUbhOWUpmk+ZY6eUZq6f+ewB1C2hIgQo/V2zLizqh8F23ZL8cvXy1a7YfoWl37oPzXeASrhbMBWKIZsyutUWqdVKYgCJ+IoyrcKJmIqdKeh6JxP97/BS09ozRZlYAVKLqkoactSdntj6cs3wE75E+EnSKvO764MthLmHNQFn10h7u6Yg2eIOwU4uaDIuhSn3J1EQcQHMQYqvSTWXFDc5MIlBJudPPd4xMoSGjOVDHd25Q2C56Sial6xirphsWLtPBfgXKlLd8VAM+zaQETcYW3ZYLqKX0R4X9mwBDndbmrqaGwCXBJg7D+1yVoHjMeiA7Dey06gyZF0bv16A1CEoZCN6EES+2OrVgX5yQ7VHdIxv2+2aJFf5kecETSXVczyJBJ9jy+qGdP1jDrcd2w0M+sM49I0X0Iuo7Dxk2cSjqG5ZgbTaVPAMaS515NLJoT/x4TNETvW3QxgrzO3VTf4ha1mG/Z4E17I7peEt03lX9LLwaoyk7v+iP5brVrt6Y+jhb2ncpWamK2pfK24ZQ==
+      template:
+        metadata:
+          creationTimestamp: null
+          name: redis-secret
+          namespace: redis
