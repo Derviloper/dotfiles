@@ -18,5 +18,5 @@ spec:
         ensure: present
         connectionLimit: -1
         inherit: true
-        disablePassword: false
+        disablePassword: true
         login: true
