@@ -1,0 +1,11 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: authentik-postgresql-database
+  namespace: postgresql
+spec:
+  databaseReclaimPolicy: delete
+  name: authentik
+  owner: authentik
+  cluster:
+    name: postgresql-cluster
