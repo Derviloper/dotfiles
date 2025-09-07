@@ -1,13 +1,6 @@
 authentik:
   enabled: false
 
-postgresql:
-  enabled: true
-  auth:
-    password: "jBp0kkVMHI06YwFy518ySD9Pusz1bDDEHdUaLjEETYX9yl6r6BLJJUqtBd3b8cKbQ1dEckto0y/l9BEF"
-redis:
-  enabled: true
-
 additionalObjects:
   - apiVersion: postgresql.cnpg.io/v1
     kind: Database
