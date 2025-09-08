@@ -22,7 +22,6 @@ extras:
       kind: ClusterRoleBinding
       metadata:
         name: dashboard-admin
-        namespace: kubernetes-dashboard
       roleRef:
         apiGroup: rbac.authorization.k8s.io
         kind: ClusterRole

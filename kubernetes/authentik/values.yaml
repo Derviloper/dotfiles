@@ -50,5 +50,6 @@ additionalObjects:
       kind: ClusterRole
       name: cluster-admin
     subjects:
-      - kind: Group
-        name: oidc:admin-kube-apiserver
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: admin-kube-apiserver
