@@ -52,4 +52,4 @@ additionalObjects:
     subjects:
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
-        name: oidc:admin-kube-apiserver
+        name: admin-kube-apiserver
