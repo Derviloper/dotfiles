@@ -3,7 +3,13 @@
   services.k3s = {
     enable = true;
     role = "server";
-    extraFlags = [ "--disable traefik" ];
+    extraFlags = [
+      "--disable traefik"
+      "--kube-apiserver-arg=oidc-issuer-url=https://authentik.derviloper.de/application/o/kube-apiserver/"
+      "--kube-apiserver-arg=oidc-client-id=kube-apiserver"
+      "--kube-apiserver-arg=oidc-username-claim=email"
+      "--kube-apiserver-arg=oidc-groups-claim=groups"
+    ];
     autoDeployCharts = {
       argocd = {
         name = "argo-cd";
