@@ -1,0 +1,14 @@
+{{- range .Values.databases }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: {{ $.Release.Name }}-{{ .name }}-database
+  namespace: {{ $.Release.Namespace }}
+spec:
+  databaseReclaimPolicy: delete
+  name: {{ .name }}
+  owner: {{ .name }}
+  cluster:
+    name: {{ $.Release.Name }}-cluster
+{{- end }}
