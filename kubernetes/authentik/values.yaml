@@ -45,7 +45,6 @@ additionalObjects:
     kind: ClusterRoleBinding
     metadata:
       name: oidc-group-admin-kube-apiserver
-      namespace: authentik
     roleRef:
       apiGroup: rbac.authorization.k8s.io
       kind: ClusterRole
