@@ -9,6 +9,9 @@ extras:
         routes:
           - kind: Rule
             match: Host(`kubernetes.derviloper.de`)
+            middlewares:
+              - name: authentik
+                namespace: traefik
             priority: 10
             services:
               - name: kubernetes-dashboard-kong-proxy
