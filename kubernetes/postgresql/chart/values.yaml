@@ -5,6 +5,25 @@ cluster:
   monitoring:
     enablePodMonitor: true
   enableSuperuserAccess: true
+  superuserSecret:
+    name: postgresql-cluster-superuser
+
+extraObjects:
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      creationTimestamp: null
+      name: postgresql-cluster-superuser
+      namespace: postgresql
+    spec:
+      encryptedData:
+        password: AgA5ZSItMyXZFFhnyfm8RIZcAA3QlwXkiPIw9gLTps83xwtbuAUMCsbahsismJtOtsWs9IhQkmQXdXW82svGxvYcQkKgxMIfV/oi9MiA8UnpgtNj1DvosD1dJnbKsRuyhc3biR3O6IZxltYD21Oa2SQpDh6aTnyhCmwtbR11vco5ccJ8V8mXajtuNh7ckQkOE6TeDtBbAnJyy9hGVdtRR2uFOyfAv7DKgo3rbsHpP1pykuTMTL2uYpy3OvFRJ4D/4R41FSxWTVdqpn+sLPbPLe/G0/Zl82ca2zyYfpgnLbzikGiSXlOnLCrGxJgODIBFegQAIBZZN/OhSC87Ris7tP0JidF/SMoBbnF5wyHwMDNFtpQiRtVSBqpZMslB7TcMF+IhhLiZkC0slk2tumM3cSOvq0ByTsJkL3imJT18jCqH25FYhLfQW5VkVFpquQEcfH1xzKtetLUwY1S6GGYj21yA3+7kzUhQI5ZIXdUl+hhjd4StEletLmbfgoG5FxXRg5D+ATVgoca1SNOuUWjsZPTnQkB8sHu24Jj2dt+Tyy5/fR7yRF5KastX+euk844A2kimSqtyZrbinh1bmV85V4PEy7IBMRTE/u0v/NrvFzCaJ/KXIzgZy+d+R8rPqxh2qLZg/4/7seZ69oaa0DnSAYc635Y+MtjlVHRES5BRfvr8l20u6xNoN7Em9LrvkHRx4knG7FYz1iPlZg7cgZllO3R6EUvqDCX/Gsb1Z6YnNaDm0Q==
+        username: AgABr5++NN+qJEDEMixmiNUprefvW/O5mA44yzXcMLXGxs9ISGi3Y+ukBu7jj+yK0fLHXJaQ1FNDgt4cCCtqwtCYl7BMshBUr3Ph4CaZl8CoKLaT5qbYBs6L6YEUdyLsulPyl3vyaC4K1W5L5yzoKYz7jQA6iLrK+g2G1K3xLIU6gRjy6CSpuekIgDNwpTGgdpRUFslT8mDwsTPMcTc1N3KiK3iO1ZjvpCSn/6vhZ0hoEzmbH9vqrZnAIDrpfZuxAgcl1TlnDiVLGD4rqUTyvUxl7p/ZfTiS7R0VcjUf76IQbMPBaKPz9za0UTTu6Da6kFYRIBKbG2Zms8O/sEVMKDpEUh6JdMOVf50OxN2450LJg5DCA6U3+2EGG0pHB8zzjkdjdS/+Ln+QGeROdeepgnHqvCQQ0ZVsdGvHhBI0he/d58zVYHKOseKH9m3bcNk6k7gXEqLkXdsnEF2693DCgsYxKkJzAHvCDo62WCrbnpcyhusLKrL2glpnknJ1XA124UaRgImGDYguOl7Y54dwwN6SvfHKrCb/gqkqV/y2iWez9N7y0Vooq93GxFfWhAQZKyscUpvTJ6iNZxjPVB/MYHDo7vsRepvr9GtR2Y83vv6DYqNrs4XuUL9/5/eI3Fpgs2SUDK+N5xo9pKPJGaKqR6lOpze5095T35SrOhRjVUyjvkRzLsfjTxKGPXavPV2cFVqP5uYPwfwtzA==
+      template:
+        metadata:
+          creationTimestamp: null
+          name: postgresql-cluster-superuser
+          namespace: postgresql
 
 databases:
   - name: authentik
