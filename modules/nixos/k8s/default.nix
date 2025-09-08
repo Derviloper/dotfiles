@@ -5,7 +5,7 @@
     role = "server";
     extraFlags = [
       "--disable traefik"
-      "--kube-apiserver-arg=oidc-issuer-url=https://authentik.derviloper.de/application/o/kube-apiserver/"
+      "--kube-apiserver-arg=oidc-issuer-url=https://authentik.derviloper.de/application/o/kube-apiserver/.well-known/openid-configuration"
       "--kube-apiserver-arg=oidc-client-id=kube-apiserver"
       "--kube-apiserver-arg=oidc-username-claim=email"
       "--kube-apiserver-arg=oidc-groups-claim=groups"
