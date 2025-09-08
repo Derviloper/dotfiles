@@ -1,11 +1,10 @@
 cluster:
   instances: 1
-
   storage:
     size: 1Gi
-
   monitoring:
     enablePodMonitor: true
+  enableSuperuserAccess: true
 
 databases:
   - name: authentik
