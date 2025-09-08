@@ -136,6 +136,10 @@ extraObjects:
           - X-authentik-meta-app
           - X-authentik-meta-version
 
+providers:
+  kubernetesCRD:
+    allowCrossNamespace: true
+
 logs:
   access:
     enabled: true
