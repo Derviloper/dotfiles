@@ -111,7 +111,6 @@
         80 # http
         443 # https
         6443 # Kubernetes API Server
-        8080 # testing
       ];
       allowedUDPPorts = [ ];
       extraInputRules = ''
