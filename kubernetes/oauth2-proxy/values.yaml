@@ -10,6 +10,7 @@ config:
     reverse_proxy = true
     set_authorization_header = true
     skip_provider_button = true
+    upstreams = [ "static://202" ]
     whitelist_domains = [ ".derviloper.de" ]
 sessionStorage:
   type: redis
