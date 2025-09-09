@@ -3,6 +3,7 @@ config:
   configFile: |-
     cookie_domains = [ ".derviloper.de" ]
     cookie_refresh = "15m"
+    email_domains = [ "*" ]
     oidc_issuer_url = "https://authentik.derviloper.de/application/o/kube-apiserver/"
     provider = "oidc"
     redirect_url = "https://oauth2-proxy.derviloper.de/oauth2/callback"
