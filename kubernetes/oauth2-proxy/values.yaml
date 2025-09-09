@@ -10,6 +10,7 @@ config:
     cookie_domains = [ ".derviloper.de" ]
     set_xauthrequest = true
     cookie_refresh = "15m"
+    cookie_samesite = "None"
     oidc_issuer_url = "https://authentik.derviloper.de/application/o/kube-apiserver/"
     reverse_proxy = true
     redirect_url = "https://oauth2-proxy.derviloper.de/oauth2/callback"
