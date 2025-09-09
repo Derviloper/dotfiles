@@ -7,6 +7,7 @@ config:
     provider_display_name = "Authentik"
     skip_provider_button = true
     set_authorization_header = true
+    set_xauthrequest = true
     cookie_refresh = "15m"
     oidc_issuer_url = "https://authentik.derviloper.de/application/o/kube-apiserver/"
     reverse_proxy = true
