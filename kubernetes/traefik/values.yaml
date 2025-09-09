@@ -142,7 +142,7 @@ extraObjects:
       namespace: traefik
     spec:
       forwardAuth:
-        address: http://oauth2-proxy.oauth2-proxy.svc.cluster.local/oauth2/auth
+        address: http://oauth2-proxy.oauth2-proxy.svc.cluster.local/
         trustForwardHeader: true
         authResponseHeaders:
           - X-Auth-Request-Access-Token

@@ -2,11 +2,11 @@ config:
   existingSecret: oauth2-proxy
   configFile: |-
     email_domains = [ "*" ]
-    upstreams = [ "http://kubernetes-dashboard-kong-proxy.kubernetes-dashboard.svc.cluster.local" ]
+    upstreams = [ "static://202" ]
     provider = "oidc"
     provider_display_name = "Authentik"
     skip_provider_button = true
-    pass_authorization_header = true
+    set_authorization_header = true
     cookie_refresh = "15m"
     oidc_issuer_url = "https://authentik.derviloper.de/application/o/kube-apiserver/"
     reverse_proxy = true

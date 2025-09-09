@@ -10,8 +10,6 @@ extras:
           - kind: Rule
             match: Host(`kubernetes.derviloper.de`)
             middlewares:
-              - name: oauth2-proxy-redirect
-                namespace: traefik
               - name: oauth2-proxy
                 namespace: traefik
             priority: 10
