@@ -4,7 +4,7 @@ config:
   cookieSecret: cookieSecretValue
   configFile: |-
     email_domains = [ "*" ]
-    upstreams = [ "http://redis-master.redis.svc.cluster.local" ]
+    upstreams = [ "http://kubernetes-dashboard-kong-proxy.kubernetes-dashboard.svc.cluster.local" ]
     provider = "oidc"
     provider_display_name = "Authentik"
     skip_provider_button = true
