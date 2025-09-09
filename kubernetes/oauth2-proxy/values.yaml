@@ -1,0 +1,18 @@
+config:
+  clientID: clientIDValue
+  clientSecret: clientSecretValue
+  cookieSecret: cookieSecretValue
+  configFile: |-
+    email_domains = [ "*" ]
+    upstreams = [ "http://redis-master.redis.svc.cluster.local" ]
+    provider = "oidc"
+    provider_display_name = "Authentik"
+    skip_provider_button = true
+    pass_authorization_header = true
+    cookie_refresh = "15m"
+sessionStorage:
+  type: redis
+  redis:
+    password: redisPasswordValue
+    standalone:
+      connectionUrl: redis://default@redis-master.redis.svc.cluster.local:6379/2
