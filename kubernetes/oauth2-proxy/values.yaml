@@ -10,6 +10,7 @@ config:
     cookie_refresh = "15m"
     oidc_issuer_url = "https://authentik.derviloper.de/application/o/kube-apiserver/"
     reverse_proxy = true
+    redirect_url = "https://oauth2-proxy.derviloper.de/oauth2/callback"
 sessionStorage:
   type: redis
   redis:
