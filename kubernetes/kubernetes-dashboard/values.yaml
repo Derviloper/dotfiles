@@ -10,7 +10,7 @@ extras:
           - kind: Rule
             match: Host(`kubernetes.derviloper.de`)
             middlewares:
-              - name: authentik
+              - name: oauth2-proxy
                 namespace: traefik
             priority: 10
             services:
