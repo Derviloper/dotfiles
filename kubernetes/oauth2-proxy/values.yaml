@@ -1,7 +1,5 @@
 config:
-  clientID: clientIDValue
-  clientSecret: clientSecretValue
-  cookieSecret: cookieSecretValue
+  existingSecret: oauth2-proxy
   configFile: |-
     email_domains = [ "*" ]
     upstreams = [ "http://kubernetes-dashboard-kong-proxy.kubernetes-dashboard.svc.cluster.local" ]
@@ -13,6 +11,24 @@ config:
 sessionStorage:
   type: redis
   redis:
-    password: redisPasswordValue
+    existingSecret: oauth2-proxy
     standalone:
       connectionUrl: redis://default@redis-master.redis.svc.cluster.local:6379/2
+extraObjects:
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      creationTimestamp: null
+      name: oauth2-proxy
+      namespace: oauth2-proxy
+    spec:
+      encryptedData:
+        client-id: AgBtmjMiZGaCcwwIeBit8xWmaMVgliJAsGh7g4Vdu21ekoz9sFk++b/YtPXe2ii99TER8aNO2oFMfVb+J3N4zBxgcoLe4wFbdrfsxvE6l1cWYqyIcBAfv8Lood5xK30O+cMm0/t6xCbo5USqKhRR1JsQytplKa5ZJzO1LDMokjFdIL95mbySL3FmNyzqviJ4MC0r6+sCo5ZhHDO6RSJZBpN6P7LDw6uPo6Ft219Za9yrQY+W4Z2gPI4frqDGF1vjyAHQM/Cmv/KFMmj7WjW6+Ur7zDR5I2ocj1OtM6i2mvRvFbBHPWM2crCQuT26NwaFDOEkyUBbrxVIAmpM8vRixG0LVchF7wTniWVjYurQmuJAGBc3BpqZXR9slcXRisqy3RkX7xJqAIIBqJU1lOs4WDy5cGHgLGUW/snfOtqvnLzrsc6dX1PAMRn//9XK/1+5iPqpSpBuhGogAxnM+g+TTolgCryiCpDMbL7KEfS1tj0mUn/7GnsrxD6QjgGMJbRWFVGJghB/6KwyJOFFGRGOG8cdXFbtj3R66JKVl5Cc3Pfr2VXFiTil0JPjZ6t090gXZNjWZrScL8FJPQG2XoerSZMnEgJIxsfTu5LwBL2bEYWhpk07G8+jjGOSlKFqHV+4b6wK0KGSQV7Bk7Rgi9dXg+HDSPm/0q+VKJLjl6+2iJF+Nvdz2cSzxTnEGfw446UFns4w4k+uBbkRdq/pmb7kyw==
+        client-secret: AgA5gTWo4NaMS8Uve5RpWczzbLWOhGOT/QLRdxL/LbJY+CUXpbkc6Ub5lpidjWjMPB3ucjnSBLWnL8YoAzbo53ZVtl74rsYduzcYbTFPvucfxFn489Es6vSCjzAZvS087RgmlEnzqjFDTNPVB/8g1yl3fxakbcQqnxXm/S7Gud5ggJBDAJWgoP9wXPEu0I1wzknkZjvhAQKJK+vhEmAPRN/KvaN1bHhKw/ZLFrkCfVq3zQcY1UQ1OR9zyGALlIKOK1qpxOvtsQnaIJEdsJoli3GvRXFgXGIsy1nK3BqlUCzpoCijIPC1c2BSkaZ+pMyM7L3MZ/DTxaQlxr1B6pPfrKz8HKR58ynd6u0KdrttVmZosmk0/VFQ30gq/RgRagtVgRODmTPH83jNgL6mekgNOyQDKa28qij9cXO2GDaTXY2FeFSLUURWV/ziB3oF+trgkqaQ+pP1ffjMRMAWbTTjE9K0hDhehykpA2hFRIYAviEeSbG53nhKif5fj1+eep33ST4M8bgfeZOyDQuQQR/tGBqHBpyVDTqe6bYTKbr6CMT+cAucicdd472XNFlFDK4FeIyNdBwNh1DgjNIMVa+U0n9Q1zLV5mNQmNqTWRXUCt2TSJYvqiWcd9ZIMYzO9sMAwjIexNqPX0mnF9WD6WAtIhjcoLemubHqEV+axfxfsxKTYluf5YxyUaUm0cTnGxExLfiE6uxOod1azGCmlBYpsE8tQM4dbbHbfu8aea3zE08bWWijNJhX20vPy7En0soo6o/dm+qNT/pxfeQrKysGuoS52lghfhMrY+KEt+NFTxaf/xrHm8IhSeyuJ3lDKF6+n6qndwMka4nLr3iNpazCvd82w3sPCF86qu6Znm6mj+J97A==
+        cookie-secret: AgBLg6wFCP9hOYC0IaBAdkpW6Qci3NYfhifppromGek3khDtXONjjnkHR3seXfcGedx6FcVVuTStUxgDlLyjTdJVqBIxnyeFDTPpgzv5YMyecDSVbVOXcnR2t04b++q/6KPJEcPtanyfsFNttnE3RYehG25xZZLk/b2qOIKDrGczcr4LSXqvs0c9XwkNiRJd8JvNowriMd6r4Ffz1b8RCgVOedWoOGxzg8FCcLax+AcWgNDBz+DgoryjHDhf8mVgDyp58Ef9nNznD04WhO38fOkYfxiwQQiB3JdMzFRbno1oYF/kpSmHHg4Wn1SvHUFQkki4GXCDZZ88WW3HWGX39vR8UcjmBbt8VeGpxB6Mrq0CZQVCkvMS0VhP3Fy+1+QnyQid27/DlP2S1EnbblkjEBZX11WFRDwXUijyF1ivuNcfS2x3Wi6jDkns8XRZhi4Rg44EBXdT6n7tMg9sfz0Ja9/cGWHW3sk77Js+XC8cfKniFLgwk8gRGcL4h1llmFAFQsXtJ7eHj4E1hmffXc9WMDI7XPVhgzNfGgD5DJfko6Nl/AjolwMXPF2tRlgbyGCzF0mAi7Q8rqa4kfNUnkYsWK8Clho9gg6A0vMG8CL/Hb2vmAJmN5iuqY/xKcgVhTNfM7UVuZ8EUgLiuv8yReCd/xy84IaXbrhtuHVMSjp4AH/SIFqx5S10pgw2VMdZSINaHXHg+V/gju7E8T/dTyHK9jgD5YKhBYKicZneC7JgecRHnw==
+        redis-password: AgAYSHBSTdx3AVy0C02eooh3oVESVl4CHwOT+Gj9ohpIDqfM9/LirXtFhHuNvdEm8uB68n/osrhV5Xoq3CkTM4578lIdnbupiZj2sIvlsDNfOmFEdnzqxdQkEBTHl0Zxa+MZMidKyCzue3hflrKjCsOvtP8/Vmq1fjcDMrjXKQMSeI58cTsHAWMO3Q82hP3RLoJsCGG2KZ2/iQ6FWUBBDvhsy1WrWXStM+ADyXi73ezF9eis9RIARUHaw6DBtpKXYKkgyqqIa3tDX7huXDeJeGuE2vKYms6Fj4/ni+/QluFOkUVC12kS390tZZdNa1Pq+MBn+Db7JtgI/nDPYYytG1pjNZAHZLpATp2kBKmhCXPuP8YmG6om8Nb4UD74yfIU7zIhGg4KqkpGokxBh7Mqu1HrdgZ/zGDnaQAmVLtVzzqo6W1/AtlrM+Jph6d4FGvO15YId6I1Cc17kaRQ6Zz0zynvCMzBvPWRXJHdLdpKeYfaVsXBnXkPBTtX4bYKDpstbeRSftwfcCRomy8j83hfny0RkYMU7HJU61aHodKmFMyaSjcAHo1v98cmGi/12PAbrUK5d2HLdkTfZyUJofTFTTGDvRfZGA9EzkqvCg7eunTNYTlnrkkc2Xt/a4CNXW7kRG2a7dx/jXWNW+PVkRf45+L/RJAn81DnCuqhS/Ydf5yMZHPj8uK7ehp0R1cegXoWpeSrFZAh/Q==
+      template:
+        metadata:
+          creationTimestamp: null
+          name: oauth2-proxy
+          namespace: oauth2-proxy
