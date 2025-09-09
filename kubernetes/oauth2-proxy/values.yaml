@@ -1,19 +1,14 @@
 config:
   existingSecret: oauth2-proxy
   configFile: |-
-    email_domains = [ "*" ]
-    upstreams = [ "static://202" ]
-    provider = "oidc"
-    provider_display_name = "Authentik"
-    skip_provider_button = true
-    set_authorization_header = true
     cookie_domains = [ ".derviloper.de" ]
-    set_xauthrequest = true
     cookie_refresh = "15m"
-    cookie_samesite = "none"
     oidc_issuer_url = "https://authentik.derviloper.de/application/o/kube-apiserver/"
-    reverse_proxy = true
+    provider = "oidc"
     redirect_url = "https://oauth2-proxy.derviloper.de/oauth2/callback"
+    reverse_proxy = true
+    set_authorization_header = true
+    skip_provider_button = true
     whitelist_domains = [ ".derviloper.de" ]
 sessionStorage:
   type: redis

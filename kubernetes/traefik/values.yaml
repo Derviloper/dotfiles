@@ -91,28 +91,6 @@ extraObjects:
           creationTimestamp: null
           name: cloudflare-api-secret
           namespace: traefik
-  - apiVersion: bitnami.com/v1alpha1
-    kind: SealedSecret
-    metadata:
-      creationTimestamp: null
-      name: dashboard-auth-secret
-      namespace: traefik
-    spec:
-      encryptedData:
-        users: AgB2GmfE1vzphURnhmP+chtUoDouGwX5FUmMGO7n9tk1sf7o5IYURzeavkBoqU6FVrFFpD9R7xwuMamYbIpKSjJyGqwLqWTwkiMNZGztCKCf925pTA+agO7PTEYUVCCdNUixWPjyVS0A7eWT4jrpikHyPmElGLpGmLzDI1n8sJhmo93ayYMR09vFv1VE3Xu+DwDr7jrHW9rps9m8nnwPOwKXBiMkLfiewZD8uxmOkf0IqLCn5wE7d8kieWHetxr3kDj3p44CaaEmWiwezbxobGjdPfYfbo1mE6zgB97kxWyEiVwqXqguzGf3/jR9ih/7NWzKtfyPfiF0lvDRE9vdH93eldEQXnzI9OPVSgXVmeUDYz2ecdtyF8nXw9tdr7IBBJFsO06Rx7mH3vemkmR40A0nOu+iZ7qzHrCNmwB/J1g3n9gw8kUy+NUYsUHesTBEA/kvil8sc6GcyZUBvL27lFWL2k32sqpvxrT1o12/Zjw6lBSNFNfJugHNgrcInUvV8wXtKTFIL+78NvB0t6HmfcxxD0a6XmpyFKx74u8hoChhQ+thppPY7ERUGn0jGkKEbZmf76V7pBbDNb8ZN7jdDV4izQ9dUADNO6O3eyFaILzXvbGo+c26J7sxY18xVcy2Z0Mia5JyqynPt0m7Ju6jx8isa520d9nYvoDQrWoYaadROuxk3tYjxzvWoKXkX0trEH/Danj5aLHonqywKg2/SOOME4tR3Ct8AosEGAbw3B+7zFLh6foubsLeXjs3Vtg=
-      template:
-        metadata:
-          creationTimestamp: null
-          name: dashboard-auth-secret
-          namespace: traefik
-  - apiVersion: traefik.io/v1alpha1
-    kind: Middleware
-    metadata:
-      name: dashboard-auth
-      namespace: traefik
-    spec:
-      basicAuth:
-        secret: dashboard-auth-secret
   - apiVersion: traefik.io/v1alpha1
     kind: Middleware
     metadata:
@@ -147,21 +125,6 @@ extraObjects:
         authResponseHeaders:
           - X-Auth-Request-Access-Token
           - Authorization
-  - apiVersion: traefik.io/v1alpha1
-    kind: Middleware
-    metadata:
-      name: oauth2-proxy-redirect
-      namespace: traefik
-    spec:
-      errors:
-        status:
-          - "401-403"
-        service:
-          name: oauth2-proxy
-          namespace: oauth2-proxy
-          port: 80
-          scheme: "http"
-        query: "/oauth2/sign_in?rd={url}"
 
 providers:
   kubernetesCRD:
