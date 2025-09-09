@@ -153,7 +153,11 @@ extraObjects:
       errors:
         status:
           - "401-403"
-        service: "oauth2-proxy.oauth2-proxy"
+        service:
+          name: oauth2-proxy
+          namespace: oauth2-proxy
+          port: 80
+          scheme: "http"
         query: "/oauth2/sign_in?rd={url}"
 
 providers:
