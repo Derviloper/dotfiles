@@ -63,24 +63,6 @@
       '';
     };
 
-    # fail2ban = {
-    #   enable = true;
-    #   jails = {
-    #     sshd = {
-    #       enabled = true;
-    #       port = "ssh";
-    #       filter = "sshd";
-    #       maxretry = 3;
-    #       bantime = "1h";
-    #       findtime = "10m";
-    #     };
-    #   };
-    #   ignoreIP = [
-    #     "127.0.0.1/8"
-    #     "::1"
-    #   ];
-    # };
-
     journald = {
       forwardToSyslog = false;
       rateLimitInterval = "30s";
@@ -93,6 +75,8 @@
         SystemKeepFree=50M
       '';
     };
+
+    fail2ban.enable = true;
 
     logrotate.enable = true;
 
