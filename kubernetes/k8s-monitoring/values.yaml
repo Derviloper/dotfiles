@@ -21,7 +21,6 @@ alloy-logs:
   enabled: true
   alloy:
     mounts:
-      varlog: false
-      dockercontainers: false
+      varlog: true
     clustering:
       enabled: true
