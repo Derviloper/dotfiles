@@ -9,61 +9,13 @@ destinations:
 clusterEvents:
   enabled: true
   collector: alloy-logs
-  namespaces:
-    - alloy
-    - argocd
-    - authentik
-    - default
-    - kube-node-lease
-    - kube-prometheus-stack
-    - kube-public
-    - kube-system
-    - kubernetes-dashboard
-    - loki
-    - sealed-secrets
-    - traefik
 
 nodeLogs:
-  enabled: false
+  enabled: true
 
 podLogs:
   enabled: true
   gatherMethod: kubernetesApi
-  collector: alloy-logs
-  labelsToKeep:
-    [
-      "app_kubernetes_io_name",
-      "container",
-      "instance",
-      "job",
-      "level",
-      "namespace",
-      "service_name",
-      "service_namespace",
-      "deployment_environment",
-      "deployment_environment_name",
-    ]
-  structuredMetadata:
-    pod: pod
-  namespaces:
-    - alloy
-    - argocd
-    - authentik
-    - default
-    - kube-node-lease
-    - kube-prometheus-stack
-    - kube-public
-    - kube-system
-    - kubernetes-dashboard
-    - loki
-    - sealed-secrets
-    - traefik
-
-alloy-singleton:
-  enabled: false
-
-alloy-metrics:
-  enabled: false
 
 alloy-logs:
   enabled: true
@@ -73,9 +25,3 @@ alloy-logs:
       dockercontainers: false
     clustering:
       enabled: true
-
-alloy-profiles:
-  enabled: false
-
-alloy-receiver:
-  enabled: false

@@ -1,4 +1,3 @@
-- Configure Authentik
 - Configure GitHub SSO for all possible applications (with authentik traefik forward auth middleware)
 - Deploy Polaris
 - Find consistent Ingress solution
