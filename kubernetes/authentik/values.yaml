@@ -37,7 +37,7 @@ additionalObjects:
       routes:
         - kind: Rule
           match: Host(`authentik.derviloper.de`)
-          priority: 11
+          priority: 10
           services:
             - name: authentik-server
               port: 80
