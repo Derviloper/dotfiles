@@ -1,0 +1,36 @@
+name: Patch Value
+
+on:
+  workflow_dispatch:
+    inputs:
+      file-path:
+        required: true
+        type: string
+      path:
+        required: true
+        type: string
+      value:
+        required: true
+        type: string
+
+jobs:
+  patch-value:
+    name: Patch Value
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch Value
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i '.${{ inputs.path }} = ${{ inputs.value }}' ${{ inputs.file-path }}
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git commit -am "Patch Value"
+          git push
