@@ -1,6 +1,6 @@
 specs: eslint pinia pixi.js playwright prettier rolldown something tailwindcss tsdown typescript vite vue
 cronTime: 0 */30 * * * *
-discordWebhookId: 1371591549544169562
+discordWebhookId: "1371591549544169562"
 extraObjects:
   - apiVersion: bitnami.com/v1alpha1
     kind: SealedSecret
