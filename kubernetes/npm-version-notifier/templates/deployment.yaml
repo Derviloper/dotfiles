@@ -22,7 +22,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: npm-version-notifier
-          image: derviloper/npm-version-notifier:1.0.0
+          image: derviloper/npm-version-notifier:{{ .Values.image.tag }}
           imagePullPolicy: IfNotPresent
           env:
             - name: SPECS
