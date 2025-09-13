@@ -26,11 +26,11 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: SPECS
-              value: {{ .Values.specs }}
+              value: "{{ .Values.specs }}"
             - name: CRON_TIME
-              value: {{ .Values.cronTime }}
+              value: "{{ .Values.cronTime }}"
             - name: DISCORD_WEBHOOK_ID
-              value: {{ .Values.discordWebhookId }}
+              value: "{{ .Values.discordWebhookId }}"
             - name: DISCORD_WEBHOOK_TOKEN
               valueFrom:
                 secretKeyRef:
