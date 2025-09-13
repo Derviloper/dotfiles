@@ -1,23 +1,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: postgresql
+  name: npm-version-notifier
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  sources:
-    - repoURL: https://cloudnative-pg.io/charts/
-      chart: cloudnative-pg
-      targetRevision: 0.26.0
-    - repoURL: https://github.com/Derviloper/dotfiles.git
-      targetRevision: HEAD
-      path: kubernetes/postgresql
+  source:
+    repoURL: https://github.com/Derviloper/dotfiles.git
+    targetRevision: HEAD
+    path: kubernetes/npm-version-notifier
 
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: postgresql
+    namespace: npm-version-notifier
 
   syncPolicy:
     automated:

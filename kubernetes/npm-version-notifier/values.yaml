@@ -1,0 +1,19 @@
+specs: eslint pinia pixi.js playwright prettier rolldown something tailwindcss tsdown typescript vite vue
+cronTime: 0 */30 * * * *
+discordWebhookId: 1371591549544169562
+extraObjects:
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      creationTimestamp: null
+      name: npm-version-notifier
+      namespace: npm-version-notifier
+    spec:
+      encryptedData:
+        discordWebhookToken: AgAC9bu7Nlnh12KP6BFLAGneH9yt2zZxNvTwZD3sx6YWwaqH28tq02h71XysOaxpfbe/gJgwh6AfAzM/k5Wll/rmaX+3jSx+g5WkgozAuxeG2lherxnHbQN/kyptIhl2S+FGPfckWBXoIO7F0cAENWtcymqW4FJ1BCcQgZucKyO/xou9HL7WeP6QDcSn0DLKlIuuErZ0Rmm0tMp+P4OcXvx2xf9eEw5CyHE4crDAk9Tdu9apYna1HA9PobufJeK3Bci3/BWclRRNcx7Gr8jwN2tGfAMJx/di7kqrik3Y12/fswOkACHbOPTb/kT7OwXGo3TMQuNdxZhGvolaq2X9AvGZGhN3Rfcc2wYoCMOhaxYFY9K4AglIvsr2h8tctyZ4EQv9MenM10uN/KsJK0eTFxL/oKdzyBTpumopLjJjd5ueyNljwyRdgMSB5VeVeGLj9XWKzl0GGpW6IWWJCVKrP2lQib779Pcitt05VW8rCsls1wpREj4VjzNNAyGJz/pPb88nDWSKdBn+XELAi9o3eX9KBKwQtSxI119IYSxj298UfUEqQsFjMvA3HVTq/bysnmi2K3Pur4gbzzgnwLMnzPbBxWvGvbGz9HaHIsQXp/5d7K/lD8r2w1woxCa6EG8GRFHQ4NGDsBueAClSvQZnneqgz2IPVT5EMqBbZDMNSquEeD1Yhyu8MPCKFysw88gn1Lgx3IcivH4BgJmElv0Tx/YUYw7NOAxFR7+1CZiMZdWgh6mjzDbJ1aAiNSNcJN1lMZwGKY9HtvtmeYr5r44Cx5mkyDb39g==
+        githubToken: AgAIfILrJU3M2TkvOutoX+qAXnglX5eGHPodKyaNhYP7/EBxcFNVdemxbk7ca19RY9QaNOHUPSIFEHMs09rBGYAZnWZZXnBZMIoKiSlLPbGjtH3xlIY7ktkc/l/9GVn9IxnOIGoN4j4PY6Q5fBd/bF3yVbkRC70G8hIiFKCFg7wLmRx8azBsqZCVrKo9JZLZGuqFySLdXSe+Fi1MvE0Lq+Z0CA+qlb7tOwVgLoqbSHd/3UlJqqVHLyDvaFZsxErgvweiPr/dT2tYPmpHr69CX/vqFYw8wVkFDplMK8s2Qc1HJPeGm06flAqJUtztXfHpHd+YB5n/HS1UTTSDpcyqFPDC/yJLmrWOhV5vmBlYyjxclos0f3UoVSrR5HYKunQ5+jmSZWPyuBd1UrAUuJumhnhdPIWKr6W2NfPktQ9oPBxK9W4GGOWO2jGvsPBA9V+9pmZiaq3oZ4lajAs6PbL7pDxOnVZRdk8fam2wR6+ovtF4QCZXg0VA7HSOdFbcrPBBRlWCou5DO7Z9mAfoq6a/RZLtzRyQuWBx+8R4hawTJg0EJVSaiU9Gac33cNEDzNUshQpgyveE6XQa8Bb05X4x9auu/vx21tjZekWdNOnXm8pP/Uo/3FlxnyIyADnFRXcX4H1XW5L6LyLquXwH0kLUSF/N+mLOdRxNvU8nQAqzIH82tCeSwtG6thJm6YqOG6yGvNdcnJCxnWlG4vQVFMHbAglf7dTcAljEOa0qxsvFiONeFQIoxzZKLXl80n2GFHEnI0upgXIVgqIfI11NIXchJU/hs7etp4pujw+LevoDDe61PRmg4OSBfRmaG1b5WrM=
+      template:
+        metadata:
+          creationTimestamp: null
+          name: npm-version-notifier
+          namespace: npm-version-notifier

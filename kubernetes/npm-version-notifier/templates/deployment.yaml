@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: npm-version-notifier
+  namespace: npm-version-notifier
+  labels:
+    app.kubernetes.io/instance: npm-version-notifier
+    app.kubernetes.io/name: npm-version-notifier
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: npm-version-notifier
+      app.kubernetes.io/name: npm-version-notifier
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: npm-version-notifier
+        app.kubernetes.io/name: npm-version-notifier
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - name: npm-version-notifier
+          image: derviloper/npm-version-notifier:1.0.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SPECS
+              value: {{ .Values.specs }}
+            - name: CRON_TIME
+              value: {{ .Values.cronTime }}
+            - name: DISCORD_WEBHOOK_ID
+              value: {{ .Values.discordWebhookId }}
+            - name: DISCORD_WEBHOOK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: npm-version-notifier
+                  key: discordWebhookToken
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: npm-version-notifier
+                  key: githubToken
