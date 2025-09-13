@@ -1,5 +1,5 @@
 image:
-  tag: 1.0.0
+  tag: latest
 specs: eslint pinia pixi.js playwright prettier rolldown something tailwindcss tsdown typescript vite vue
 cronTime: 0 */30 * * * *
 discordWebhookId: "1371591549544169562"
