@@ -19,7 +19,6 @@ spec:
         app.kubernetes.io/instance: npm-version-notifier
         app.kubernetes.io/name: npm-version-notifier
     spec:
-      automountServiceAccountToken: true
       containers:
         - name: npm-version-notifier
           image: derviloper/npm-version-notifier:{{ .Values.image.tag }}
