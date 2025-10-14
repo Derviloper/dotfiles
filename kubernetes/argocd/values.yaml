@@ -48,7 +48,7 @@ extraObjects:
   - apiVersion: traefik.io/v1alpha1
     kind: IngressRoute
     metadata:
-      name: argocd-server
+      name: argocd-route
       namespace: argocd
     spec:
       routes:

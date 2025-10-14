@@ -31,7 +31,7 @@ additionalObjects:
   - apiVersion: traefik.io/v1alpha1
     kind: IngressRoute
     metadata:
-      name: authentik-server
+      name: authentik-route
       namespace: authentik
     spec:
       routes:

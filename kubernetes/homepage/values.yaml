@@ -1,10 +1,29 @@
 image:
   tag: 1.0.0
 extraObjects:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: noop
+      namespace: homepage
+    spec:
+      ports:
+        - port: 9999
+          targetPort: 9999
+      clusterIP: None
+  - apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: homepage-redirect-middleware
+      namespace: homepage
+    spec:
+      redirectRegex:
+        regex: "^(.*)"
+        replacement: "https://derviloper.de"
   - apiVersion: traefik.io/v1alpha1
     kind: IngressRoute
     metadata:
-      name: homepage-server
+      name: homepage-route
       namespace: homepage
     spec:
       routes:
@@ -14,3 +33,10 @@ extraObjects:
           services:
             - name: homepage
               port: 80
+        - kind: Rule
+          match: PathPrefix(`/`)
+          middlewares:
+            - name: homepage-redirect-middleware
+          services:
+            - name: noop
+              port: 9999

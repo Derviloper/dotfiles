@@ -12,7 +12,7 @@ extraManifests:
   - apiVersion: traefik.io/v1alpha1
     kind: IngressRoute
     metadata:
-      name: kube-prometheus-stack-server
+      name: kube-prometheus-stack-route
       namespace: kube-prometheus-stack
     spec:
       routes:
