@@ -58,10 +58,3 @@ extraObjects:
           services:
             - name: argocd-server
               port: 80
-        - kind: Rule
-          match: Host(`argocd.derviloper.de`) && Header(`Content-Type`, `application/grpc`)
-          priority: 11
-          services:
-            - name: argocd-server
-              port: 80
-              scheme: h2c
