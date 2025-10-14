@@ -35,6 +35,7 @@ extraObjects:
               port: 80
         - kind: Rule
           match: PathPrefix(`/`)
+          priority: 1
           middlewares:
             - name: homepage-redirect-middleware
           services:
