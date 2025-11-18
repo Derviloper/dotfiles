@@ -97,6 +97,8 @@
         6443 # Kubernetes API Server
       ];
       allowedUDPPorts = [ ];
+      allowPing = true;
+      pingLimit = "2/second";
       extraInputRules = ''
         ip saddr 10.42.0.0/16 accept
         ip saddr 10.43.0.0/16 accept
