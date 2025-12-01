@@ -3,6 +3,13 @@ minecraftServer:
   version: "1.21.10"
   type: "PAPER"
   serviceType: LoadBalancer
+  memory: 12G
+  difficulty: hard
+  ops: Derviloper
+  motd: "Derviloper's Minecraft Server"
+
+extraEnv:
+  USE_MEOWICE_FLAGS: "TRUE"
 
 persistence:
   dataDir:
