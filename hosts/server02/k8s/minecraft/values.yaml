@@ -2,3 +2,4 @@ minecraftServer:
   eula: "TRUE"
   version: "1.21.10"
   type: "PAPER"
+  serviceType: LoadBalancer
