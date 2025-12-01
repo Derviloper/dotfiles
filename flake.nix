@@ -35,13 +35,18 @@
     in
     {
       nixosConfigurations = builtins.listToAttrs (
-        map (name: {
-          inherit name;
-          value = nixpkgs.lib.nixosSystem {
-            specialArgs = { inherit inputs; };
-            modules = [ ./hosts/${name} ];
-          };
-        }) [ "server01" ]
+        map
+          (name: {
+            inherit name;
+            value = nixpkgs.lib.nixosSystem {
+              specialArgs = { inherit inputs; };
+              modules = [ ./hosts/${name} ];
+            };
+          })
+          [
+            "server01"
+            "server02"
+          ]
       );
 
       deploy.nodes =
@@ -61,16 +66,21 @@
             }
           );
         in
-        builtins.mapAttrs (name: sshUser: {
-          hostname = name;
-          profiles.system = {
-            inherit sshUser;
-            user = "root";
-            remoteBuild = true;
-            path =
-              deployPkgs.${self.nixosConfigurations.${name}.pkgs.system}.deploy-rs.lib.activate.nixos
-                self.nixosConfigurations.${name};
+        builtins.mapAttrs
+          (name: sshUser: {
+            hostname = name;
+            profiles.system = {
+              inherit sshUser;
+              user = "root";
+              remoteBuild = true;
+              path =
+                deployPkgs.${self.nixosConfigurations.${name}.pkgs.system}.deploy-rs.lib.activate.nixos
+                  self.nixosConfigurations.${name};
+            };
+          })
+          {
+            server01 = "admin";
+            server02 = "admin";
           };
-        }) { server01 = "admin"; };
     };
 }
