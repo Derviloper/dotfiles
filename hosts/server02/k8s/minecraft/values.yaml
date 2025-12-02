@@ -4,9 +4,7 @@ minecraftServer:
   type: "PAPER"
   serviceType: LoadBalancer
   memory: 12G
-  difficulty: hard
-  ops: Derviloper
-  motd: "Derviloper's Minecraft Server"
+  motd: "\\u00a7bIven\\u00a7c &\\u00a7a Daniel's\\u00a76 Minecraft Server\\u00a7c \\u2665"
 
 extraEnv:
   USE_MEOWICE_FLAGS: "TRUE"
