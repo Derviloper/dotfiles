@@ -1,26 +1,28 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: k8s-monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  name: traefik
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - repoURL: https://grafana.github.io/helm-charts
-      chart: k8s-monitoring
-      targetRevision: 3.3.2
+    - repoURL: https://traefik.github.io/charts
+      chart: traefik
+      targetRevision: 37.0.0
       helm:
         valueFiles:
-          - $values/kubernetes/k8s-monitoring/values.yaml
+          - $values/kubernetes/cluster01/traefik/values.yaml
     - repoURL: https://github.com/Derviloper/dotfiles.git
       targetRevision: HEAD
       ref: values
 
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: k8s-monitoring
+    namespace: traefik
 
   syncPolicy:
     automated:

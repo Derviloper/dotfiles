@@ -1,28 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
-  name: traefik
+  name: argocd
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - repoURL: https://traefik.github.io/charts
-      chart: traefik
-      targetRevision: 37.0.0
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 8.3.0
       helm:
         valueFiles:
-          - $values/hosts/server02/k8s/traefik/values.yaml
+          - $values/kubernetes/cluster01/argocd/values.yaml
     - repoURL: https://github.com/Derviloper/dotfiles.git
       targetRevision: HEAD
       ref: values
 
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: traefik
+    namespace: argocd
 
   syncPolicy:
     automated:

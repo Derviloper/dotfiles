@@ -1,26 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kube-prometheus-stack
+  name: minecraft
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - repoURL: https://prometheus-community.github.io/helm-charts
-      chart: kube-prometheus-stack
-      targetRevision: 77.0.1
+    - repoURL: https://itzg.github.io/minecraft-server-charts/
+      chart: minecraft
+      targetRevision: 5.0.0
       helm:
         valueFiles:
-          - $values/kubernetes/kube-prometheus-stack/values.yaml
+          - $values/kubernetes/cluster01/cluster01/minecraft/values.yaml
     - repoURL: https://github.com/Derviloper/dotfiles.git
       targetRevision: HEAD
       ref: values
 
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: kube-prometheus-stack
+    namespace: minecraft
 
   syncPolicy:
     automated:
@@ -28,7 +28,6 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
     retry:
       limit: 5
       backoff:

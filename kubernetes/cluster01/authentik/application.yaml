@@ -1,26 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd
+  name: authentik
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - repoURL: https://argoproj.github.io/argo-helm
-      chart: argo-cd
-      targetRevision: 8.3.0
+    - repoURL: https://charts.goauthentik.io/
+      chart: authentik
+      targetRevision: 2025.8.1
       helm:
         valueFiles:
-          - $values/hosts/server02/k8s/argocd/values.yaml
+          - $values/kubernetes/cluster01/authentik/values.yaml
     - repoURL: https://github.com/Derviloper/dotfiles.git
       targetRevision: HEAD
       ref: values
 
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: argocd
+    namespace: authentik
 
   syncPolicy:
     automated:

@@ -1,26 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: oauth2-proxy
+  name: kubernetes-dashboard
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - repoURL: https://oauth2-proxy.github.io/manifests
-      chart: oauth2-proxy
-      targetRevision: 8.2.0
+    - repoURL: https://kubernetes.github.io/dashboard/
+      chart: kubernetes-dashboard
+      targetRevision: 7.13.0
       helm:
         valueFiles:
-          - $values/kubernetes/oauth2-proxy/values.yaml
+          - $values/kubernetes/cluster01/kubernetes-dashboard/values.yaml
     - repoURL: https://github.com/Derviloper/dotfiles.git
       targetRevision: HEAD
       ref: values
 
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: oauth2-proxy
+    namespace: kubernetes-dashboard
 
   syncPolicy:
     automated:

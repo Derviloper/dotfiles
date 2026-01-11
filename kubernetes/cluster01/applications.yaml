@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/Derviloper/dotfiles.git
     targetRevision: HEAD
-    path: kubernetes
+    path: kubernetes/cluster01
     directory:
       recurse: true
       include: "**/application.yaml"

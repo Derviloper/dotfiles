@@ -1,26 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kubernetes-dashboard
+  name: loki
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - repoURL: https://kubernetes.github.io/dashboard/
-      chart: kubernetes-dashboard
-      targetRevision: 7.13.0
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: loki
+      targetRevision: 6.37.0
       helm:
         valueFiles:
-          - $values/kubernetes/kubernetes-dashboard/values.yaml
+          - $values/kubernetes/cluster01/loki/values.yaml
     - repoURL: https://github.com/Derviloper/dotfiles.git
       targetRevision: HEAD
       ref: values
 
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: kubernetes-dashboard
+    namespace: loki
 
   syncPolicy:
     automated:

@@ -9,9 +9,9 @@
     disko.url = "github:nix-community/disko";
 
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    home-manager.url = "github:nix-community/home-manager/release-25.05";
+    home-manager.url = "github:nix-community/home-manager/release-25.11";
 
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
 
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     sops-nix.url = "github:Mic92/sops-nix";
@@ -45,7 +45,6 @@
           })
           [
             "server01"
-            "server02"
           ]
       );
 
@@ -80,7 +79,6 @@
           })
           {
             server01 = "admin";
-            server02 = "admin";
           };
     };
 }
