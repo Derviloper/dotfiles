@@ -37,3 +37,9 @@ kong:
       enabled: true
     tls:
       enabled: false
+
+# NOTE: the Kubernetes Dashboard project was archived in January 2026 and its
+# chart repo moved from kubernetes.github.io/dashboard (now 404) to
+# kubernetes-retired.github.io/dashboard. The pin still resolves, but this is an
+# unmaintained component holding a cluster-admin binding. Worth replacing with
+# k9s or Headlamp, or dropping entirely.
