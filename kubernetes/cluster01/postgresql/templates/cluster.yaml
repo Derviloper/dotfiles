@@ -5,9 +5,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   {{- .Values.cluster | toYaml | nindent 2 }}
+  {{- /* `with` skips the block entirely when there are no databases. Emitting
+         `managed.roles:` with an empty range renders `roles: null`, which the
+         CNPG CRD rejects: "must be of type array". */}}
+  {{- with .Values.databases }}
   managed:
     roles:
-      {{- range .Values.databases }}
+      {{- range . }}
       - name: {{ .name }}
         ensure: present
         passwordSecret:
@@ -16,3 +20,4 @@ spec:
         inherit: true
         login: true
       {{- end }}
+  {{- end }}
