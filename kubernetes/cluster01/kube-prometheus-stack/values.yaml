@@ -1,4 +1,6 @@
 grafana:
+  admin:
+    existingSecret: grafana-admin
   datasources:
     datasources.yaml:
       apiVersion: 1
@@ -21,18 +23,16 @@ extraManifests:
           services:
             - name: kube-prometheus-stack-grafana
               port: 80
-
-# SECURITY: grafana.derviloper.de is published above with no auth middleware and
-# no admin password set, so Grafana falls back to the chart default
-# (historically admin/prom-operator). Fix before relying on this:
-#
-#   kubectl -n kube-prometheus-stack create secret generic grafana-admin \
-#     --dry-run=client -o yaml \
-#     --from-literal=admin-user=admin --from-literal=admin-password='<new>' \
-#   | kubeseal --cert local/server01/sealed-secrets-certificate.pem --format yaml
-#
-# then commit the SealedSecret under extraManifests and set:
-#   grafana.admin.existingSecret: grafana-admin
-#
-# Deliberately not enabled here: pointing at a secret that does not exist yet
-# would stop Grafana from starting.
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: grafana-admin
+      namespace: kube-prometheus-stack
+    spec:
+      encryptedData:
+        admin-password: AgA4ko7Zf8H+2GdW/nhEfhmxKpCAhHelKhcc9FNqwTkOrWDMVPVBQhlv6YQfNfHbgWPEuNpza7H7KQAORWUU+WmttoTF6UcluvDfookz8gkmUvjcTAhQiUY4u9J6l4NvHm+q0YrZOVgItGkpDDhgVoDSjGZGoAY19YTeGwpe6jbQ82hbwqZRQ6cP6DpjEJEY1QvmSGjWWEJUVXAupC2FjD9UR2VjABiuC9H/2AfHiug0tz/39qd/Ycpj7PIZPn/+4TrILT1Hf0Ttj31LpRw/z02n96oxMoPHJ6UO4TogUel/AoKr12weGUN/4VMbsig7HIKd2muaKopPcrmCv4wNUNlguzvamYAFPwgj+72+IpZ6MvQG9dxtRXbI/wLeKxA836nURY3pEpwrAgSEHP/InrCqOKGt++O+FnxrcIC+CMPEHN4GOB77GRuIIEalrF7M1bm1PyQY9PUGMwwq7G+v28UnAJe6YQQVbe3h5WLYrMv4/Axb7rNkG67ekTmquSxKOkoa2xDIIMRXypLTcEgw+SHh6Peh87dLodmJIapIXjYp904ARZK3Z/4szOn4ZnBI7I5Tthh2/KJ8IySko1i8EgebeqPzLi+A0W0m3DcQ44f4r8ZhqtPrNvk2jY4+fk6zFFRGgV5m0QqhyzA9e4ILgAun8L6BudBwckuOcOBsbkyTjACga50tFvqbG5Y+GW81l4mzf/MXlEVmjM9QzUIc926ytS0nDqgeVNryI8VRAiRi5w==
+        admin-user: AgA+iDhMK3JRzwv02kP1V+VT5bNdoHSjsfpYsgl658BVvzTPe86Jqvfst3ANlvgvoVcbpNTj3lbpDE7D1W8yTtbO3HQC6q6q3AovSjl1O7EBUKzafPxqNDiT1RHO9CZCuRvbnpAwe/TcjeYVEi07IkyZ92xNyT8nt96e7iMHmbpBgG9EVXvnZvLP08AFI87pSOR20X6ag6d4iSsPAeMQY0h4IP859q2fsF92K0iEstP5XC5Srs8Fnyi8vSpv11b0MeTBlxu3lkPHGoutb7XM/2hZ/BXJ7DlviLwXglMsKpjQ1LFqXMyQnuDXDfK7H3v+RiaKslBa54/yOEMVF88BILq+LdE30avs15aQvuoQHGI+pNwd0+3rm9cfkg4BfuIoDzfyMP5PKW8tekdIAbW/l8sTmPkrEVkZfASv3TWwF6kXP5bGg9KQ0uvingRYYKEzRY8RjIpYg/8pymqkmVgSmyXKWtC9xeAggkUBIR9PVl4V7e1KHG+h9VJDG/Qu5aNQJaNOH9QzGyR+/LD0UDoPny7O/fFi6wmzF2Kx7vhQX3vON+dQBNxoKQobnO4lS3S08r2ZzelX2gRLUT0YJ4/jS4DYbd8g/rJ+tUfeL33VF32SLzpLc5RgB6cEe+mckY78vHRIvtOn0GkMXWd642W/67m6d2W3st9FIuqxuihNkJ1S9bpSbHb6rhloo0a+dCQR6SJRJ42GmQ==
+      template:
+        metadata:
+          name: grafana-admin
+          namespace: kube-prometheus-stack
