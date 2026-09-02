@@ -1,0 +1,44 @@
+(defpoll time :interval "200ms"
+  "date '+%a %d %b  %H:%M:%S'")
+
+(defpoll cpu :interval "2s"
+  "top -bn1 | awk '/Cpu\\(s\\)/ {print int(100 - $8)}'")
+
+(defpoll ram :interval "2s"
+  "free | awk '/Mem:/ {printf \"%d\", $3/$2 * 100}'")
+
+(deflisten workspaces :initial "[]"
+  "bash ~/.config/eww/workspaces.sh")
+
+(defwidget workspaces-widget []
+  (box :class "workspaces" :orientation "h" :space-evenly false :spacing 0 :halign "start"
+    (for ws in workspaces
+      (button :class "workspace ${ws.state}"
+              :onclick "bspc desktop -f ${ws.num}"
+        "${ws.num}"))))
+
+(defwidget clock-widget []
+  (label :class "clock" :text time))
+
+(defwidget metrics-widget []
+  (box :class "metrics" :orientation "h" :space-evenly false :spacing 12 :halign "end"
+    (label :class "metric" :text "CPU ${cpu}%")
+    (label :class "metric" :text "RAM ${ram}%")))
+
+(defwidget main []
+  (centerbox :orientation "h"
+    (workspaces-widget)
+    (clock-widget)
+    (metrics-widget)))
+
+(defwindow bar
+  :monitor 0
+  :stacking "fg"
+  :windowtype "dock"
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :width "100%"
+                      :height "32px"
+                      :anchor "top center")
+  :reserve (struts :side "top" :distance "32px")
+  (main))

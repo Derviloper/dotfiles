@@ -1,0 +1,38 @@
+grafana:
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Loki
+          type: loki
+          access: proxy
+          url: http://loki.loki.svc.cluster.local:3100
+extraManifests:
+  - apiVersion: traefik.io/v1alpha1
+    kind: IngressRoute
+    metadata:
+      name: kube-prometheus-stack-route
+      namespace: kube-prometheus-stack
+    spec:
+      routes:
+        - kind: Rule
+          match: Host(`grafana.derviloper.de`)
+          priority: 10
+          services:
+            - name: kube-prometheus-stack-grafana
+              port: 80
+
+# SECURITY: grafana.derviloper.de is published above with no auth middleware and
+# no admin password set, so Grafana falls back to the chart default
+# (historically admin/prom-operator). Fix before relying on this:
+#
+#   kubectl -n kube-prometheus-stack create secret generic grafana-admin \
+#     --dry-run=client -o yaml \
+#     --from-literal=admin-user=admin --from-literal=admin-password='<new>' \
+#   | kubeseal --cert local/server01/sealed-secrets-certificate.pem --format yaml
+#
+# then commit the SealedSecret under extraManifests and set:
+#   grafana.admin.existingSecret: grafana-admin
+#
+# Deliberately not enabled here: pointing at a secret that does not exist yet
+# would stop Grafana from starting.

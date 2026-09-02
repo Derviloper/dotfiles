@@ -1,0 +1,19 @@
+# One policy for the whole repo. Every rule carries &admin in addition to the
+# host key: without it a secret can only be edited from the machine that owns
+# it, and is unrecoverable if that machine dies.
+keys:
+  - &admin age10aguczvsc0uzlqpqgrrlt2qp5m28sczh2228tpa5uyv223de7p9qnc3s9j
+  - &server01 age1v0m34gqqk36xgzlh8m22n6ulggzakjtgcer0wn6nw7y20tmsgywqfau3q0
+  # Add a host key with:  ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub
+  # - &homelab   age1...
+  # - &desktop01 age1...
+creation_rules:
+  - path_regex: ^hosts/server01/secrets/.*$
+    key_groups:
+      - age:
+          - *admin
+          - *server01
+
+# - path_regex: ^secrets/homelab\.yaml$
+#   key_groups:
+#     - age: [*admin, *homelab]

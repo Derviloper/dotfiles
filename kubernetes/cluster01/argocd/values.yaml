@@ -1,0 +1,53 @@
+global:
+  domain: argocd.derviloper.de
+configs:
+  cm:
+    exec.enabled: true
+    # Re-enabled. When authentik was removed, dex.config went with it but this
+    # stayed false and secret.createSecret stayed false -- leaving no local
+    # admin and no SSO, i.e. no way to log in at all.
+    #
+    # After the first sync, read the generated password and rotate it:
+    #   kubectl -n argocd get secret argocd-initial-admin-secret \
+    #     -o jsonpath='{.data.password}' | base64 -d
+    #   argocd account update-password
+    # Then seal the new bcrypt hash into argocd-secret as admin.password and
+    # delete argocd-initial-admin-secret.
+    admin.enabled: true
+  # policy.csv previously granted to the authentik groups "ArgoCD Admins" and
+  # "ArgoCD Viewers", which no longer exist. Restore group rules here when an
+  # identity provider is reintroduced.
+  params:
+    # Safe only because Traefik terminates TLS in front of argocd-server.
+    server.insecure: true
+  secret:
+    createSecret: false
+extraObjects:
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      creationTimestamp: null
+      name: argocd-secret
+      namespace: argocd
+    spec:
+      encryptedData:
+        server.secretkey: AgB877/0Hk8RGLyEd4/rnQyZUFxmh7313LutVTMsOqbPmDzwxCjLuNQ1t0etYnciTnNRKVr1r3WJnPJOKaVNuX4EfiMLFMiVLkTawQmdzVge0y1bF9MPtH2E8MIH4eu2RGraz8kDjA5D7zdKRLSQuyV7gWAWhUkpI5EeeK2uwqZBLbalHmZ+kp5fkOICwuaTiXLwQJMCtw6SxbsjPq+Op88hocI4WKA3lSK+rLBCfeZPNxTgMfeFO9VMZZTLbsq13d952m4JNq8o2+g6iqjQIioTYwWEcp2gPxIV4d/PMfijxCsyxsFPGbCws3tD5Y5WkXyGl08EVGHKYU0rWEvkRTwz8Sx98RoZTtSl+VVExEIET2tdVNDgDtYFK7KQkqzyLHqpD/z2bmm4fDzM7rbhOVao4yq0vEcCHtBy0lOGtV6/ZNaoVYYfqTBPwNU25or12RqxKmSodM1Lms24Mag4NhMFaFunK7Msic4Li0JQl+Z8JfSjYRtF/wLFEPd3oB9rWksRCaOh32LcYbK9IvEjLsZWXZGJ4dRUxObPqWE9yoZ4wAFJg2xv5aeMOFYX6gYtH0s4vSGt1+pwPLhAThvz+181zksRcjaewWlnHmfeRxQKa4l3Km+PkHrzp1BjHar8cRnRJR4J6XOexpdBFHsqV3ndBbNZHPJTyP7D+yQaaJnSqcl8s/pdGTjKfaDL/rqnJNMdveIG+/reAogR+LT15213ML044gL21pQjbT11GPAOEOmP0Ro4GAzY2rJ/wQ==
+        webhook.github.secret: AgAFbItL7hbmBp4tEUa62N18mAXdPtIg1/vuRejI8KjAc73tjovdqGKApS1Jq9Tfw0Aeu8GjNUyb5A/NXi/viNGpMRz9f0Rek/HOXJ/UvuUfQBTE/0QciknJYAnwFe9UhcTR5/PHLgJ3c88vKnHv6sfS74+TuxIQgWg/S5nvOxeE986XLHUGYeKOiYnhHluCU4gzYtqMIskRzcrzssHocHvrTZPa5WX5tqq3oK2WM6NeS6jEfrfPeAZ/+Jdh6y/6ayoplwTEl4AbQx+sq+EszEyjhH6BQgimxIVtaszwfNlxn7DOMRwS/vdOOCwEwQrTccH0Jwb5zFwaTbw/rrYG+dMuvOWECz0R/0tVDORVQuWn47KPgPMAgd2UTTeR2fF6XaiK7Kie/nnEfeD7CIiwPaL5MsEdOoVib6l9sMUMJExjLlztwD0NgSI7YPE3TkqF8eo1N80TbdmxNlX7qJUDfftZKro4vxd6bgLYFqj0hEUezSuxy1R4xsQJiqO6nxGT2RhZ959mW7vMlnE+h8S/u4P5NNHfPo1kCx7xpCWVAhVHAAMynZIn/zGfZjACY4r0SzP4WZoZ4epZ/RqtTFEBoIT+QfGIKMYKjAoDntt5wbL3yAI+qdXIcqdSGjzS+F499q87fG42Pf++WnxnADVr2q6AQ28WicPomF4jM+f0ww4n1cTMhL10qYNOBO7TXSDtdr3q759DjjfjxV4GSCJjfA31JUGUUvbPSL+ArvOZ6e5j5A==
+      template:
+        metadata:
+          creationTimestamp: null
+          name: argocd-secret
+          namespace: argocd
+  - apiVersion: traefik.io/v1alpha1
+    kind: IngressRoute
+    metadata:
+      name: argocd-route
+      namespace: argocd
+    spec:
+      routes:
+        - kind: Rule
+          match: Host(`argocd.derviloper.de`)
+          priority: 10
+          services:
+            - name: argocd-server
+              port: 80

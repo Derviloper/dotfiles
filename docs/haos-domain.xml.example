@@ -1,0 +1,57 @@
+<!--
+  Reference snapshot of the imperatively-created `haos` libvirt domain
+  (Home Assistant OS VM). This file is NOT consumed by the flake — the VM is
+  managed imperatively with virsh/virt-install because HAOS self-updates and
+  mutates its own disk. Regenerate with: virsh --connect qemu:///system dumpxml haos
+-->
+<domain type='kvm'>
+  <name>haos</name>
+  <uuid><!-- assigned by libvirt at creation --></uuid>
+  <description>Home Assistant OS</description>
+  <memory unit='KiB'>12582912</memory>
+  <currentMemory unit='KiB'>12582912</currentMemory>
+  <vcpu placement='static'>4</vcpu>
+  <os firmware='efi'>
+    <type arch='x86_64' machine='pc-q35-10.2'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <smm state='on'/>
+  </features>
+  <cpu mode='host-passthrough' check='none' migratable='on'/>
+  <devices>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='/var/lib/libvirt/images/haos.qcow2'/>
+      <target dev='sda' bus='scsi'/>
+    </disk>
+    <controller type='scsi' index='0' model='virtio-scsi'/>
+    <interface type='bridge'>
+      <mac address='<!-- assigned by libvirt at creation -->'/>
+      <source bridge='br0'/>
+      <model type='virtio'/>
+    </interface>
+    <!-- SONOFF Dongle Plus MG24 (Zigbee), passed through by USB vendor/product.
+         startupPolicy='optional' lets the VM boot even when the dongle is absent. -->
+    <hostdev mode='subsystem' type='usb' managed='yes'>
+      <source startupPolicy='optional'>
+        <vendor id='0x10c4'/>
+        <product id='0xea60'/>
+      </source>
+    </hostdev>
+    <!-- FTDI FT230X Basic UART, passed through by USB vendor/product.
+         startupPolicy='optional' lets the VM boot even when the dongle is absent. -->
+    <hostdev mode='subsystem' type='usb' managed='yes'>
+      <source startupPolicy='optional'>
+        <vendor id='0x0403'/>
+        <product id='0x6015'/>
+      </source>
+    </hostdev>
+    <serial type='pty'><target type='isa-serial' port='0'/></serial>
+    <console type='pty'><target type='serial' port='0'/></console>
+    <watchdog model='itco' action='reset'/>
+    <memballoon model='virtio'/>
+  </devices>
+</domain>

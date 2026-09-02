@@ -1,0 +1,20 @@
+# Two kinds of ciphertext in this repo are *meant* to be committed. Without
+# these allowlists the pre-commit hook fires on every change to kubernetes/ and
+# gets disabled, which is worse than not having it.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ciphertext that is safe to publish by design"
+regexes = [
+  # SealedSecrets: asymmetrically encrypted to the cluster's sealed-secrets
+  # controller. Only that controller's private key can decrypt them.
+  '''Ag[A-Za-z0-9+/=]{120,}''',
+  # sops values, and the age recipients/envelopes that wrap their data keys.
+  '''ENC\[AES256_GCM,data:.*\]''',
+  '''-----BEGIN AGE ENCRYPTED FILE-----''',
+]
+paths = [
+  # Wholly sops-managed.
+  '''hosts/server01/secrets/.*''',
+]

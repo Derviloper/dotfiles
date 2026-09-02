@@ -1,0 +1,39 @@
+# Two things were removed here, both left unsafe when authentik was dropped:
+#
+# 1. The kubernetes.derviloper.de IngressRoute. It lost its authentik forwardAuth
+#    middleware, leaving a public login page in front of a cluster-admin-capable
+#    dashboard. Reach it over a port-forward instead:
+#      kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+#
+# 2. The dashboard-admin-token Secret. It was a legacy
+#    kubernetes.io/service-account-token: a cluster-admin bearer token that never
+#    expires and cannot be revoked without deleting the ServiceAccount. Mint a
+#    short-lived one when you actually need it:
+#      kubectl -n kubernetes-dashboard create token dashboard-admin --duration=1h
+#
+# The ServiceAccount and its binding stay, so token minting still works.
+extras:
+  manifests:
+    - apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: dashboard-admin
+        namespace: kubernetes-dashboard
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: dashboard-admin
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: cluster-admin
+      subjects:
+        - kind: ServiceAccount
+          name: dashboard-admin
+          namespace: kubernetes-dashboard
+kong:
+  proxy:
+    http:
+      enabled: true
+    tls:
+      enabled: false

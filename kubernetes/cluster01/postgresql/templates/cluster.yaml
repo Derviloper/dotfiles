@@ -1,0 +1,18 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Release.Name }}-cluster
+  namespace: {{ .Release.Namespace }}
+spec:
+  {{- .Values.cluster | toYaml | nindent 2 }}
+  managed:
+    roles:
+      {{- range .Values.databases }}
+      - name: {{ .name }}
+        ensure: present
+        passwordSecret:
+          name: {{ $.Release.Name }}-{{ .name }}-secret
+        connectionLimit: -1
+        inherit: true
+        login: true
+      {{- end }}

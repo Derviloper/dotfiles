@@ -1,0 +1,12 @@
+minecraftServer:
+  eula: "TRUE"
+  version: "1.21.10"
+  type: "PAPER"
+  serviceType: LoadBalancer
+  memory: 4G
+  motd: "\\u00a7bDerviloper\\u00a76 Minecraft Server\\u00a7c \\u2665"
+extraEnv:
+  USE_MEOWICE_FLAGS: "TRUE"
+persistence:
+  dataDir:
+    enabled: true

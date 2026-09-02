@@ -1,0 +1,59 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Nightly, so the expensive desktop01 closure gets built once a day rather
+    # than on every pull request.
+    - cron: "0 4 * * *"
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    name: Lint and evaluate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      # Formatting, statix, deadnix, gitleaks and the deploy-rs checks. The
+      # toplevels are built separately below so this job stays fast.
+      - run: nix build --print-build-logs .#checks.x86_64-linux.formatting .#checks.x86_64-linux.pre-commit
+      - run: nix flake check --no-build --print-build-logs
+  build:
+    name: Build ${{ matrix.host }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [homelab, server01]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - run: nix build --print-build-logs ".#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel"
+  build-desktop:
+    name: Build desktop01
+    # X11 + Brave + VS Code + rustup is several GB and crowds a 14 GB runner,
+    # so it runs nightly and on main rather than per pull request.
+    if: github.event_name == 'schedule' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Free runner disk space
+        run: |
+          sudo rm -rf /opt/hostedtoolcache /usr/local/lib/android /usr/share/dotnet
+          df -h /
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - run: nix build --print-build-logs ".#nixosConfigurations.desktop01.config.system.build.toplevel"

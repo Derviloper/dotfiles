@@ -1,0 +1,21 @@
+cluster:
+  name: default
+destinations:
+  - name: loki
+    type: loki
+    url: http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push
+clusterEvents:
+  enabled: true
+  collector: alloy-logs
+nodeLogs:
+  enabled: true
+podLogs:
+  enabled: true
+  gatherMethod: kubernetesApi
+alloy-logs:
+  enabled: true
+  alloy:
+    mounts:
+      varlog: true
+    clustering:
+      enabled: true

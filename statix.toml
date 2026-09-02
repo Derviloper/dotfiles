@@ -1,0 +1,3 @@
+# nixos-generate-config output is kept byte-identical, so statix must not have
+# opinions about it. Mirrors the treefmt and deadnix exclusions.
+ignore = ["hosts/*/hardware.nix"]

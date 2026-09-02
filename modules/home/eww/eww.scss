@@ -1,0 +1,40 @@
+* {
+  all: unset;
+  font-family: "Roboto";
+  font-size: 16px;
+}
+
+window {
+  background-color: #000000;
+  color: #cccccc;
+}
+
+.workspaces {
+  padding: 0 8px;
+}
+
+.workspace {
+  padding: 0 6px;
+  color: #555555;
+}
+
+.workspace.occupied {
+  color: #cccccc;
+}
+
+.workspace.active {
+  color: #008000;
+  font-weight: bold;
+}
+
+.clock {
+  font-weight: bold;
+}
+
+.metrics {
+  padding: 0 12px;
+}
+
+.metric {
+  padding: 0 8px;
+}

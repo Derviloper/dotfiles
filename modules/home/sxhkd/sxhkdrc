@@ -1,0 +1,31 @@
+super + Return
+    ghostty
+
+super + c
+    code
+
+super + b
+    brave
+
+super + e
+    thunar
+
+# close and kill
+super + {_,shift + }q
+	bspc node -{c,k}
+
+# set the window state
+super + {t,f}
+	bspc node -t {tiled,fullscreen}
+
+# focus or send to the given desktop
+super + {_,shift + }{1-9,0}
+	bspc {desktop -f,node -d} '^{1-9,10}'
+
+# expand a window by moving one of its side outward
+super + {w,a,s,d}
+	bspc node -z {top 0 -20,left -20 0,bottom 0 20,right 20 0}
+
+# contract a window by moving one of its side inward
+super + shift + {w,a,s,d}
+	bspc node -z {bottom 0 -20,right -20 0,top 0 20,left 20 0}
