@@ -39,6 +39,11 @@ install host="server01":
 kubeconfig host="server01":
     ./scripts/get-kubeconfig.sh {{ host }}
 
+# Fetch the sealed-secrets public cert into local/ (gitignored). Needed by `seal`.
+fetch-cert host="server01":
+    mkdir -p local/{{ host }}
+    kubeseal --controller-namespace sealed-secrets --controller-name sealed-secrets --fetch-cert > local/{{ host }}/sealed-secrets-certificate.pem
+
 # Seal a Kubernetes Secret for committing.
 seal:
     ./scripts/create-secret.sh

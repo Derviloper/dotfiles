@@ -23,7 +23,7 @@ err() {
 # Ensure dependencies
 command -v kubectl >/dev/null 2>&1 || err "kubectl is not installed"
 command -v kubeseal >/dev/null 2>&1 || err "kubeseal is not installed"
-[[ -f $CERT_FILE ]] || err "Certificate file '$CERT_FILE' not found"
+[[ -f $CERT_FILE ]] || err "Certificate '$CERT_FILE' not found. Fetch it with: just fetch-cert"
 
 # Create temporary directory
 temp_dir=$(mktemp -d)
