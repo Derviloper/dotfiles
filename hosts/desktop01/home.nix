@@ -21,6 +21,7 @@
     gcc
     gnumake
     libsecret
+    nixfmt
     rustup
     vscode
     watchexec

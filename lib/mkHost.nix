@@ -26,6 +26,12 @@ inputs.nixpkgs.lib.nixosSystem {
         useUserPackages = true;
         extraSpecialArgs = { inherit inputs username; };
 
+        # Without this, a single unmanaged file in the way ("would be
+        # clobbered") aborts the whole activation -- so nothing home-manager
+        # owns gets updated, and the failure is only visible in the journal.
+        # Move the stray file aside instead and keep going.
+        backupFileExtension = "hm-bak";
+
         users.${username} = {
           imports = [ ../hosts/${hostname}/home.nix ];
 

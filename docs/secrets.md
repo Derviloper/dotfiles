@@ -69,3 +69,26 @@ key unseals every `SealedSecret` in `kubernetes/`. Two consequences:
   on a laptop.
 - This repository is public. The confidentiality of every cluster secret rests
   entirely on that age key.
+
+## Machine-local ssh addresses
+
+`modules/home/ssh.nix` sets `Include config.local` at the top of the generated
+`~/.ssh/config`. ssh takes the **first** value it obtains for each keyword, so
+anything in `~/.ssh/config.local` overrides the committed blocks.
+
+That file is where a host's real address goes when it must not be published.
+`server01` sits behind Cloudflare -- `derviloper.de` resolves to Cloudflare, not
+to the box -- so committing its origin IP here would let anyone bypass the proxy
+and reach the origin directly, defeating the WAF and the `forwardedHeaders`
+trustedIPs setup in `kubernetes/cluster01/traefik/values.yaml`.
+
+```sh
+cat > ~/.ssh/config.local <<'EOT'
+Host server01
+  HostName <origin address>
+EOT
+chmod 600 ~/.ssh/config.local
+```
+
+`deploy-rs` and `scripts/get-kubeconfig.sh` both go through ssh, so they pick
+this up automatically.
