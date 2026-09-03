@@ -51,6 +51,11 @@ just update                 # refresh flake inputs
 `nix develop` drops you into a shell with sops, age, ssh-to-age, deploy-rs,
 kubectl, helm, kubeseal, nvd and nh.
 
+It hands over to zsh so you keep the normal p10k prompt instead of bare bash.
+That only happens for an interactive session -- `nix develop -c <cmd>` and CI
+stay in bash, since exec'ing a shell there would mean the command never runs.
+`NO_DEV_ZSH=1 nix develop` opts out.
+
 ### Rebuilding vs. deploying
 
 `desktop01` is rebuilt in place. Use `just boot` rather than `just switch` for

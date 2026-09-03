@@ -132,8 +132,25 @@
       formatter.${system} = treefmtEval.config.build.wrapper;
 
       devShells.${system}.default = pkgs.mkShell {
-        inherit (preCommit) shellHook;
         buildInputs = preCommit.enabledPackages;
+
+        shellHook = ''
+          ${preCommit.shellHook}
+
+          # `nix develop` always lands in bash. Hand over to the same zsh + p10k
+          # the hosts run -- but only for a genuinely interactive session.
+          # `nix develop -c <cmd>` and CI must stay in bash: there, $- has no
+          # `i`, and exec'ing a shell would mean the command never runs.
+          # Set NO_DEV_ZSH=1 to opt out.
+          case $- in
+            *i*)
+              if [ -t 0 ] && [ -z "''${NO_DEV_ZSH:-}" ] && command -v zsh > /dev/null 2>&1; then
+                exec zsh
+              fi
+              ;;
+          esac
+        '';
+
         packages = with pkgs; [
           # secrets
           sops
