@@ -1,6 +1,5 @@
 {
   config,
-  pkgs,
   modulesPath,
   ...
 }:
@@ -41,11 +40,6 @@
     k3s = {
       enable = true;
       role = "server";
-
-      # Pinned deliberately. nixpkgs 25.11 defaulted to k3s_1_34 and 26.05
-      # defaults to k3s_1_35, so without this line an OS upgrade silently
-      # becomes a Kubernetes control-plane upgrade. Bump it as its own change.
-      package = pkgs.k3s_1_34;
 
       disable = [ "traefik" ];
 
