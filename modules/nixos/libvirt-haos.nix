@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   # USB dongles passed through to the imperatively-managed `haos` libvirt domain,
   # matched by VID:PID (see docs/haos-domain.xml.example). When one of these
@@ -83,6 +88,58 @@ let
         exec $virsh attach-device haos ${hostdevXml d} --live
       done
     '';
+
+  # The qcow2 cannot live in the Nix store: HAOS self-updates and writes to its
+  # own disk continuously, so the image is mutable state by definition. This is
+  # therefore an imperative one-shot bootstrap, guarded to run exactly once per
+  # machine. It runs the same virt-install invocation the docs describe, rather
+  # than defining a frozen XML, so the two cannot drift and libvirt keeps
+  # re-deriving the OVMF and machine-type details across QEMU upgrades.
+  macFile = config.sops.secrets."haos/mac".path;
+
+  provision = pkgs.writeShellScript "haos-provision" ''
+    set -euo pipefail
+
+    img=/var/lib/libvirt/images/haos.qcow2
+    install -d -m 0755 /var/lib/libvirt/images
+    work=$(mktemp -d -p /var/lib/libvirt/images)
+    trap 'rm -rf "$work"' EXIT
+
+    url=$(curl -fsSL https://api.github.com/repos/home-assistant/operating-system/releases/latest |
+      jq -r '.assets[] | select(.name | test("^haos_ova-.*[.]qcow2[.]xz$")) | .browser_download_url' |
+      head -n1)
+    if [ -z "$url" ]; then
+      echo "no haos_ova qcow2.xz asset in the latest release" >&2
+      exit 1
+    fi
+
+    curl -fL "$url" -o "$work/haos.qcow2.xz"
+    xz --decompress "$work/haos.qcow2.xz"
+    qemu-img resize "$work/haos.qcow2" 64G
+    mv "$work/haos.qcow2" "$img"
+    chown root:root "$img"
+
+    # Pinning the MAC keeps the router's DHCP reservation valid across a
+    # rebuild, so Home Assistant returns on the same address. A libvirt-assigned
+    # one is still better than refusing to boot if the secret is unavailable.
+    net="bridge=br0,model=virtio"
+    if [ -r "${macFile}" ]; then
+      net="$net,mac=$(cat "${macFile}")"
+    else
+      echo "no MAC at ${macFile}; letting libvirt assign one" >&2
+    fi
+
+    virt-install --connect qemu:///system \
+      --name haos --description "Home Assistant OS" \
+      --os-variant generic \
+      --memory 12288 --vcpus 4 --cpu host-passthrough --machine q35 \
+      --disk path="$img",format=qcow2,bus=scsi \
+      --controller type=scsi,model=virtio-scsi \
+      --network "$net" \
+      --import --graphics none --boot uefi --noautoconsole
+
+    virsh --connect qemu:///system autostart haos
+  '';
 in
 {
   virtualisation.libvirtd.enable = true;
@@ -98,7 +155,41 @@ in
     ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="${d.vendor}", ATTR{idProduct}=="${d.product}", ATTR{power/control}="on", TAG+="systemd", ENV{SYSTEMD_WANTS}+="haos-usb-reattach-${d.name}.service"
   '') haosUsbDevices;
 
-  systemd.services = lib.listToAttrs (
+  systemd.services = {
+    haos-provision = {
+      description = "Download and define the Home Assistant OS VM";
+      wantedBy = [ "multi-user.target" ];
+      requires = [ "libvirtd.service" ];
+      after = [
+        "libvirtd.service"
+        "network-online.target"
+        "sops-install-secrets.service"
+      ];
+      wants = [ "network-online.target" ];
+
+      # Runs exactly once per machine: once the image exists this is inert.
+      unitConfig.ConditionPathExists = "!/var/lib/libvirt/images/haos.qcow2";
+
+      path = with pkgs; [
+        curl
+        jq
+        xz
+        qemu-utils
+        virt-manager
+        libvirt
+      ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = provision;
+        # A ~400MB download plus decompress and resize; the 90s default would
+        # kill this mid-write.
+        TimeoutStartSec = "infinity";
+      };
+    };
+  }
+  // lib.listToAttrs (
     map (
       d:
       lib.nameValuePair "haos-usb-reattach-${d.name}" {
@@ -108,6 +199,7 @@ in
         # every boot gets one run that outlives the libvirt-guests restore.
         wantedBy = [ "multi-user.target" ];
         after = [
+          "haos-provision.service"
           "libvirtd.service"
           "libvirt-guests.service"
         ];

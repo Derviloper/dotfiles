@@ -3,18 +3,19 @@
 # it, and is unrecoverable if that machine dies.
 keys:
   - &admin age1lc7ncq7wlwklwcf8grt0x3e3tp73jm5q7fqayg4sfquzxxc83f9qwhjask
+  - &homelab age1yz5ghrmekfvl0ssl6f076fzsz5zctgj384923ev6nehehdsarpuq6fcqkt
   - &server01 age1v0m34gqqk36xgzlh8m22n6ulggzakjtgcer0wn6nw7y20tmsgywqfau3q0
   # Add a host key with:  ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub
-  # - &homelab   age1...
-  # - &desktop01 age1...
 creation_rules:
   # Covers the directory, but only the files you actually run sops against get
   # encrypted -- ssh_host_ed25519_key.pub lives here in plaintext on purpose.
+  - path_regex: ^hosts/homelab/secrets/.*$
+    key_groups:
+      - age:
+          - *admin
+          - *homelab
   - path_regex: ^hosts/server01/secrets/.*$
     key_groups:
       - age:
           - *admin
           - *server01
-# - path_regex: ^secrets/homelab\.yaml$
-#   key_groups:
-#     - age: [*admin, *homelab]

@@ -7,6 +7,14 @@
     ../../modules/nixos/tailscale.nix
   ];
 
+  sops = {
+    defaultSopsFile = ./secrets/sops.yaml;
+    secrets = {
+      "haos/mac" = { };
+      "tailscale/oauthSecret" = { };
+    };
+  };
+
   boot.loader = {
     systemd-boot.enable = true;
     efi.canTouchEfiVariables = true;
