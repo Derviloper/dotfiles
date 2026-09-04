@@ -3,6 +3,7 @@
 # it, and is unrecoverable if that machine dies.
 keys:
   - &admin age10aguczvsc0uzlqpqgrrlt2qp5m28sczh2228tpa5uyv223de7p9qnc3s9j
+  - &admin_new age1lc7ncq7wlwklwcf8grt0x3e3tp73jm5q7fqayg4sfquzxxc83f9qwhjask
   - &server01 age1v0m34gqqk36xgzlh8m22n6ulggzakjtgcer0wn6nw7y20tmsgywqfau3q0
   # Add a host key with:  ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub
   # - &homelab   age1...
@@ -12,6 +13,7 @@ creation_rules:
     key_groups:
       - age:
           - *admin
+          - *admin_new
           - *server01
 
 # - path_regex: ^secrets/homelab\.yaml$
