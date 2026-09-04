@@ -75,6 +75,41 @@ let
         sleep 1
       done
       $virsh domstate haos 2>/dev/null | grep -q running || exit 0
+
+      # Repairing a hostdev means detaching it first, and the guest sees that as
+      # an unplug: enough to kill ZHA's open serial handle and take every Zigbee
+      # device offline until Home Assistant is restarted. This unit is
+      # Type=oneshot without RemainAfterExit, so it is never "active" and
+      # switch-to-configuration starts it again on *every* nixos-rebuild --
+      # meaning without this check, each deploy silently broke Zigbee for no
+      # reason. RemainAfterExit is not the fix: it would make the udev-triggered
+      # hotplug path a no-op, which is the whole point of the unit.
+      #
+      # So: only touch the domain when the attachment is actually wrong. A
+      # hostdev that is present and resolved to the address the dongle currently
+      # occupies needs no repair. A missing one, or one still pointing at a
+      # pre-re-enumeration address, has no matching resolved address and falls
+      # through to the detach/attach below.
+      liveAddr() {
+        $virsh dumpxml haos 2>/dev/null | ${pkgs.libxml2}/bin/xmllint --xpath \
+          "string(/domain/devices/hostdev[source/vendor/@id='0x${d.vendor}' and source/product/@id='0x${d.product}']/source/address/@$1)" \
+          - 2>/dev/null
+      }
+
+      for dev in /sys/bus/usb/devices/*/; do
+        [ "$(cat "$dev/idVendor" 2>/dev/null)" = "${d.vendor}" ] || continue
+        [ "$(cat "$dev/idProduct" 2>/dev/null)" = "${d.product}" ] || continue
+        pluggedBus=$(cat "$dev/busnum" 2>/dev/null)
+        pluggedDev=$(cat "$dev/devnum" 2>/dev/null)
+        break
+      done
+
+      if [ -n "''${pluggedBus:-}" ] &&
+        [ "$(liveAddr bus)" = "$pluggedBus" ] &&
+        [ "$(liveAddr device)" = "$pluggedDev" ]; then
+        echo "${d.name} already attached at bus $pluggedBus device $pluggedDev; leaving it alone"
+        exit 0
+      fi
       i=0
       while [ "$i" -lt 5 ] && $virsh detach-device haos ${hostdevXml d} --live 2>/dev/null; do
         i=$((i + 1))
