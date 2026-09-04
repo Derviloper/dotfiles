@@ -1,4 +1,5 @@
 # Graphical workstation.
+{ lib, pkgs, ... }:
 {
   imports = [
     ./base.nix
@@ -22,4 +23,13 @@
     LC_TELEPHONE = "de_DE.UTF-8";
     LC_TIME = "de_DE.UTF-8";
   };
+
+  # home-manager installs direnv and its nix-direnv wiring, but its shell
+  # integration hooks into home-manager's own zsh module -- and zsh is
+  # configured at system level here so that root gets the same shell. So the
+  # hook belongs here. mkAfter keeps it behind the p10k instant-prompt block,
+  # which has to come first.
+  programs.zsh.interactiveShellInit = lib.mkAfter ''
+    eval "$(${pkgs.direnv}/bin/direnv hook zsh)"
+  '';
 }

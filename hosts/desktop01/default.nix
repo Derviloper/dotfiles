@@ -28,10 +28,11 @@
       "wheel"
       "pipewire"
     ];
-    # FIXME: empty password. sshd's PermitEmptyPasswords=no keeps this off the
-    # network, but combined with wheelNeedsPassword=false it is root for anyone
-    # at the VM console. Replace with hashedPasswordFile once a sops secret
-    # exists for it; carried over as-is so the upgrade does not lock you out.
+    # Empty only until first login: `just bootstrap` runs passwd immediately
+    # after install, and initialHashedPassword applies solely at user creation,
+    # so the real password sticks. Keeping it empty is what lets the installer
+    # run unattended and still leave you able to log in at the console --
+    # which is also the escape hatch if seed-dotfiles ever fails to clone.
     initialHashedPassword = "";
   };
 

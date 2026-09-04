@@ -92,3 +92,34 @@ chmod 600 ~/.ssh/config.local
 
 `deploy-rs` and `scripts/get-kubeconfig.sh` both go through ssh, so they pick
 this up automatically.
+
+## homelab
+
+`hosts/homelab/secrets/sops.yaml` holds two values, keyed to homelab's existing
+host key so its identity is unchanged:
+
+- `haos/mac` -- the Home Assistant VM's MAC, pinned so the router's DHCP
+  reservation survives a rebuild and Home Assistant returns on the same address.
+  `haos-provision` falls back to a libvirt-assigned MAC if this is unreadable,
+  rather than refusing to create the VM.
+- `tailscale/oauthSecret` -- wired to `services.tailscale.authKeyFile`, so a
+  freshly installed homelab joins the tailnet without a manual `tailscale up`.
+
+### Setting the Tailscale secret
+
+It ships as `REPLACE_ME`, because creating the client is console work:
+
+1. In the Tailscale admin console, add a `tag:homelab` entry under `tagOwners`
+   in the ACL. **This must exist before the first join** or `tailscale up` fails
+   with a tag error.
+1. Create an OAuth client with the `auth_keys` write scope, tagged `tag:homelab`.
+1. `sops hosts/homelab/secrets/sops.yaml` and replace the placeholder with the
+   `tskey-client-...` secret.
+
+An OAuth client secret is used rather than a plain auth key because auth keys
+expire after at most 90 days -- a from-scratch rebuild would fail whenever the
+committed one had lapsed.
+
+Until it is set, `tailscaled-autoconnect.service` fails on homelab. That is
+harmless if homelab is already on the tailnet, but it is the reason a
+from-scratch homelab will not join by itself yet.

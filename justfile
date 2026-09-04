@@ -1,6 +1,47 @@
 _default:
     @just --list --unsorted
 
+# One-time setup on a freshly installed desktop01: install the one SSH key.
+bootstrap keyfile:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    # That key is the only secret you ever type. It is your SSH auth to both
+    # servers, your git signing key, and the sops admin identity that decrypts
+    # everything else -- which is why one key is enough for the whole fleet.
+
+    key="$HOME/.ssh/id_ed25519"
+
+    if [ -e "$key" ] && ! cmp -s "{{ keyfile }}" "$key"; then
+      echo "$key already exists and differs from {{ keyfile }}." >&2
+      echo "Move it aside first -- refusing to overwrite a private key." >&2
+      exit 1
+    fi
+
+    install -d -m 700 "$HOME/.ssh"
+    install -m 600 "{{ keyfile }}" "$key"
+    ssh-keygen -y -f "$key" > "$key.pub"
+    chmod 644 "$key.pub"
+
+    # sops-nix derives each host's identity from its SSH host key; yours is
+    # derived the same way, which is why one key covers the whole fleet.
+    install -d -m 700 "$HOME/.config/sops/age"
+    ssh-to-age -private-key -i "$key" > "$HOME/.config/sops/age/keys.txt"
+    chmod 600 "$HOME/.config/sops/age/keys.txt"
+
+    # Fail here rather than three commands later inside an install, where a
+    # wrong key surfaces as an unexplainable decryption error.
+    if ! sops decrypt hosts/server01/secrets/sops.yaml > /dev/null 2>&1; then
+      echo "That key cannot decrypt this repo's secrets -- wrong key?" >&2
+      echo "It yields recipient: $(ssh-to-age < "$key.pub")" >&2
+      grep -E '&admin ' .sops.yaml >&2
+      exit 1
+    fi
+
+    echo "Key installed and verified against server01's secrets."
+    echo "Set a login password (the installer leaves it empty):"
+    passwd
+
 # Evaluate everything: formatting, lints, deploy checks, all three toplevels.
 check:
     nix flake check --print-build-logs

@@ -171,5 +171,63 @@
           nh
         ];
       };
+
+      # Runs *on* the machine being installed, so a bare NixOS ISO needs no
+      # checkout and no credentials:
+      #   nix --extra-experimental-features "nix-command flakes" \
+      #     run github:Derviloper/dotfiles#install -- desktop01
+      #
+      # `just install <host>` is the other direction -- installing a remote host
+      # from desktop01, via scripts/install.sh.
+      apps.${system}.install = {
+        type = "app";
+        program = lib.getExe (
+          pkgs.writeShellApplication {
+            name = "install-host";
+            runtimeInputs = [
+              pkgs.util-linux
+              pkgs.nixos-install-tools
+              inputs.disko.packages.${system}.disko
+            ];
+            text = ''
+              if [ $# -ne 1 ]; then
+                echo "usage: install <hostname>" >&2
+                echo "hosts: ${lib.concatStringsSep " " (lib.attrNames hosts)}" >&2
+                exit 1
+              fi
+              host=$1
+
+              # The ISO enables neither, and a nested nix call does not inherit
+              # the flags the outer `nix run` was given.
+              nixflags=(--extra-experimental-features "nix-command flakes")
+
+              # Refuse to format a disk the machine does not have. Read the
+              # device from the evaluated config so this cannot disagree with
+              # what disko is about to do.
+              want=$(nix "''${nixflags[@]}" eval --raw \
+                "${self}#nixosConfigurations.$host.config.disko.devices.disk.main.device")
+              have=$(lsblk -dno PATH,SIZE,TYPE | awk '$3 == "disk"')
+
+              if ! grep -qE "^''${want}[[:space:]]" <<<"$have"; then
+                echo "ERROR: $host installs to '$want', which this machine does not have." >&2
+                echo "Disks here:" >&2
+                awk '{ print "  " $0 }' <<<"$have" >&2
+                exit 1
+              fi
+
+              echo "This ERASES $want on this machine and installs $host."
+              read -r -p "Type the hostname to confirm: " confirm
+              if [ "$confirm" != "$host" ]; then
+                echo "aborted" >&2
+                exit 1
+              fi
+
+              disko --mode destroy,format,mount --flake "${self}#$host"
+              nixos-install --flake "${self}#$host" --no-root-passwd
+              echo "Installed. Reboot, then run: just bootstrap <your ssh key>"
+            '';
+          }
+        );
+      };
     };
 }

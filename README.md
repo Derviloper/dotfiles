@@ -65,13 +65,26 @@ live switch and can leave you at a black screen.
 `homelab` and `server01` are deployed with deploy-rs, which activates with
 automatic rollback. `just deploy <host>` dry-activates first.
 
-## Installing a host from scratch
+## Installing from scratch
 
-See [docs/install.md](docs/install.md). Short version:
+Four commands and one secret rebuild the entire fleet. See
+[docs/install.md](docs/install.md).
 
 ```sh
-just install server01       # nixos-anywhere; ERASES THE TARGET DISK
+# from the NixOS live ISO
+sudo nix --extra-experimental-features "nix-command flakes" \
+  run github:Derviloper/dotfiles#install -- desktop01
+
+# on desktop01, after reboot -- the only secret you type
+just bootstrap ~/id_ed25519
+
+# both servers, from desktop01
+just install server01
+just install homelab
 ```
+
+k3s and all twelve Argo CD applications, and the Home Assistant OS VM, come up
+unattended from there.
 
 ## Secrets
 
