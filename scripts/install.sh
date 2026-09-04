@@ -21,11 +21,14 @@ install -d -m755 "$extra_files/etc/ssh"
 # The host SSH key is the root of trust for sops-nix: sops-nix converts it to an
 # age identity at activation, so it must be in place before the first boot.
 nix-shell -p sops --run "
-  sops decrypt hosts/$server/secrets/ssh_host_ed25519_key > $extra_files/etc/ssh/ssh_host_ed25519_key &&
-  sops decrypt hosts/$server/secrets/ssh_host_ed25519_key.pub > $extra_files/etc/ssh/ssh_host_ed25519_key.pub
+  sops decrypt hosts/$server/secrets/ssh_host_ed25519_key > $extra_files/etc/ssh/ssh_host_ed25519_key
 "
 chmod 600 "$extra_files/etc/ssh/ssh_host_ed25519_key"
-chmod 644 "$extra_files/etc/ssh/ssh_host_ed25519_key.pub"
+
+# Only the private half is encrypted. The public key is committed in plaintext --
+# it is a public key, and encrypting it just cost this script a second decrypt.
+install -m 644 "hosts/$server/secrets/ssh_host_ed25519_key.pub" \
+  "$extra_files/etc/ssh/ssh_host_ed25519_key.pub"
 
 nix run github:nix-community/nixos-anywhere -- \
   --generate-hardware-config nixos-generate-config \
