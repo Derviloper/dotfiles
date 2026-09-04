@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: asterisk
+  namespace: asterisk
+  labels:
+    app.kubernetes.io/instance: asterisk
+    app.kubernetes.io/name: asterisk
+data:
+  pjsip.conf: |
+    [global]
+    type=global
+    ; Scanners fingerprint the User-Agent to pick an exploit. Do not hand them
+    ; the version.
+    user_agent=PBX
+
+    [transport-udp]
+    type=transport
+    protocol=udp
+    ; hostNetwork, so this binds the node's real public address. Asterisk is not
+    ; behind NAT and needs no external_media_address -- which is what keeps
+    ; server01's origin IP out of this repo. See docs/pbx.md.
+    bind=0.0.0.0:{{ .Values.sip.port }}
+
+    [endpoint-defaults](!)
+    type=endpoint
+    context=internal
+    transport=transport-udp
+    disallow=all
+    ; All three are built in. Anything else (opus) would need a codec module the
+    ; image does not ship.
+    allow=alaw,ulaw,g722
+    dtmf_mode=rfc4733
+    ; Both handsets sit behind a home router. direct_media would have them send
+    ; RTP straight at each other's private addresses.
+    direct_media=no
+    rtp_symmetric=yes
+    force_rport=yes
+    rewrite_contact=yes
+
+    [aor-defaults](!)
+    type=aor
+    max_contacts=1
+    remove_existing=yes
+    ; Also keeps the home NAT pinhole open between calls.
+    qualify_frequency=30
+
+    ; PJSIP keys sections by name *and* type, so the endpoint and the AoR both
+    ; being [1001] is the intended idiom, not a duplicate.
+    [1001](endpoint-defaults)
+    auth=auth1001
+    aors=1001
+    callerid=Phone A <1001>
+
+    [1001](aor-defaults)
+
+    [1002](endpoint-defaults)
+    auth=auth1002
+    aors=1002
+    callerid=Phone B <1002>
+
+    [1002](aor-defaults)
+
+    ; The two auth sections, from the asterisk-pjsip-auth SealedSecret. There is
+    ; deliberately no [anonymous] endpoint, so the default
+    ; endpoint_identifier_order rejects unauthenticated callers outright.
+    #include "pjsip_auth.conf"
+  extensions.conf: |
+    [general]
+    static=yes
+    writeprotect=yes
+
+    ; The only context any endpoint can reach. No pattern match and no trunk, so
+    ; a stolen password can ring the other handset and nothing else -- toll
+    ; fraud is impossible here rather than merely guarded against.
+    [internal]
+    exten => 1001,1,Dial(PJSIP/1001,30)
+     same  =>     n,Hangup()
+
+    exten => 1002,1,Dial(PJSIP/1002,30)
+     same  =>     n,Hangup()
+
+    ; The shortcuts: A dials 2 for B, B dials 1 for A. A SIP phone sends the
+    ; whole dialled string in one INVITE, so 1 and 1001 are matched exactly and
+    ; do not collide the way they would on an analog line.
+    exten => 1,1,Goto(internal,1001,1)
+    exten => 2,1,Goto(internal,1002,1)
+
+    ; Self-test without a second person. Echo and Milliwatt generate their audio
+    ; in-process, so neither depends on sound files being present in the image.
+    exten => 600,1,Answer()
+     same  =>     n,Echo()
+     same  =>     n,Hangup()
+
+    exten => 601,1,Answer()
+     same  =>     n,Milliwatt()
+     same  =>     n,Hangup()
+  rtp.conf: |
+    [general]
+    ; Keep in step with allowedUDPPortRanges in hosts/server01/default.nix --
+    ; one-way audio is what a mismatch looks like.
+    rtpstart={{ .Values.rtp.start }}
+    rtpend={{ .Values.rtp.end }}
+    strictrtp=yes
+  logger.conf: |
+    [general]
+
+    [logfiles]
+    ; Straight to stdout, where k8s-monitoring picks it up into Loki. `security`
+    ; carries the failed-authentication events.
+    console => notice,warning,error,security

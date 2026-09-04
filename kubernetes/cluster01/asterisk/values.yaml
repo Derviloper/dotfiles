@@ -1,0 +1,46 @@
+image:
+  repository: andrius/asterisk
+  # Asterisk 22 LTS. Renovate's helm-values manager sees repository+tag, but the
+  # _debian-trixie suffix is not semver, so expect to bump this by hand.
+  tag: 22.10.1_debian-trixie
+sip:
+  # Not 5060, which is scanned around the clock -- this drops the REGISTER and
+  # OPTIONS flood to near zero. Being honest about it: this repo is public, so
+  # the port is public too. It defeats untargeted scanning, not someone reading
+  # this file. The controls that actually matter are the trunkless dialplan in
+  # templates/configmap.yaml and 32-character random passwords.
+  #
+  # Changing this means changing allowedUDPPorts in hosts/server01/default.nix
+  # and the SIP Server field on both phones.
+  port: 5160
+rtp:
+  # 100 ports is ~25 concurrent call legs, far more than two handsets can use.
+  # Must match allowedUDPPortRanges in hosts/server01/default.nix.
+  start: 10000
+  end: 10099
+# Deliberately absent, so that removing them later is a decision rather than an
+# oversight:
+#
+# - TLS/SRTP. Signalling and audio cross the public internet in the clear.
+#   Encrypting them needs a real certificate for Asterisk, i.e. cert-manager as
+#   a new cluster app with a Cloudflare DNS-01 issuer reusing the token in
+#   traefik/values.yaml, or scraping Traefik's acme.json. The Asterisk side is
+#   then a transport-tls section plus media_encryption=sdes on the endpoints.
+# - Persistence. No PVC, so a pod restart drops the registrations; the phones
+#   re-register within their 2 minute expiry. Nothing here is worth keeping
+#   across a restart -- no voicemail, no CDR.
+# - fail2ban. The security log lives inside the pod, and with no trunk the worst
+#   a brute force achieves is ringing the other handset.
+extraObjects:
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: asterisk-pjsip-auth
+      namespace: asterisk
+    spec:
+      encryptedData:
+        pjsip_auth.conf: AgAYO8la5QgPUl/OkZRMwawVpPOC0U8NiigLFQ6ZQUf/p93FX70p8PdlIfn+Nt9OwK+H0gIXL7TBOjzND7gAAfTopgwz0hwPfKrT94HcqvhwBSm6h5fSQTWm4Kp0Z2ACiiCLx6fRPc2tOPGweoRCigy28NOVGTwWpYHeqvOselneAEBvO9rGuy/mUVmseBzhjaEskTw8GIv0kkAoc5qzV3nvd4Xx7zwZ3VtXkN5qeYuDPsH7iyWxzKC3Vyw8ng7FR8E+09OlnGvbbF74eFf7paUgPneX5SJf7XH7Anhg7jjm69NGp8I0y3q86zKwmdPF81/WoS503DrObE+2Xyphv3I56AfdjePk8wUlDQcUzMwVfc16qEwtni5uxbLyxiw41BsXfeJ0dd+sDu8OtWpnhykpyDBV5vTlU25ksIbfUYCCLyQPLBPB1WxqjexbQv83OU+R63ldRjqo1NFmUdwgl5dIwkcfhAmtKswctO25cq0CVPSTw6kHzjQuNATB6nANLzJXNSB762G9tah4YQ4d4tnmTcrWXHvvLJaYOaSsvxFpgAJ1YPlk2seRpk2JRukYft4jfmu4maeUHdMy8Tw3kwv04xNZfWhK++2eF4jeosgYDm1AQRzPUlPjc1rsn+wh/I6hEJBdNJmOI8MgXF+dtcwooJQjwjn5K/KKlR7m0SqVjaPoUN4vdSTf6S2JhzJtYta3NwUtIWXMNZUZTCJBGrdpsPLvEx2zWb9KJIo5kWV/w2xg5Uz1F1VVZgaOJ005KSjnlC/FpqSbFiKsmdmS2YIGn9ItF+acku1fUWYI43Ub0QuBumwguBkQViWFt7XwpLE115BMpGU1/TvsCWkhSYHXq6qa/82//boiW9fA6QfbAv3q5FpI0wP39kMtC9neqH19PD2cxzgkG8HHA6UxmQitZzuPErciey3axHNOcQmLDvTcIQ7jkjjGalT3ABcMllqq
+      template:
+        metadata:
+          name: asterisk-pjsip-auth
+          namespace: asterisk

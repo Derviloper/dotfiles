@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asterisk
+  namespace: asterisk
+  labels:
+    app.kubernetes.io/instance: asterisk
+    app.kubernetes.io/name: asterisk
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  strategy:
+    # hostNetwork: a second pod cannot bind the SIP port while the first still
+    # holds it, so a rolling update would deadlock.
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: asterisk
+      app.kubernetes.io/name: asterisk
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: asterisk
+        app.kubernetes.io/name: asterisk
+      annotations:
+        # Rolls the deployment when the dialplan or pjsip.conf changes. It does
+        # not cover the secret -- rotating a password needs a manual
+        # `kubectl -n asterisk rollout restart deploy/asterisk`.
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      # RTP needs a contiguous UDP range, which a Service cannot express -- the
+      # LoadBalancer pattern minecraft uses would mean 100 enumerated ports and
+      # a 100-hostPort klipper DaemonSet. hostNetwork also puts Asterisk on the
+      # node's public address directly, so there is no NAT on the server side.
+      # The node firewall in hosts/server01/default.nix is the exposure surface.
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      initContainers:
+        # A read-only ConfigMap mounted over /etc/asterisk breaks two things:
+        # the image entrypoint chown -Rs that directory, and Asterisk wants it
+        # writable for astdb. So seed an emptyDir from the image's own configs
+        # and overlay ours on top.
+        - name: config
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              if [ -d /etc/asterisk ]; then cp -a /etc/asterisk/. /config/; fi
+              cp -f /overlay/*.conf /config/
+              cp -f /overlay-secret/*.conf /config/
+              # The copies land root-owned, but asterisk drops to its own user
+              # before reading them, so 0640 without this chown locks it out of
+              # its own dialplan.
+              chown -R asterisk:asterisk /config
+              chmod 0640 /config/*.conf
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: overlay
+              mountPath: /overlay
+            - name: overlay-secret
+              mountPath: /overlay-secret
+      containers:
+        - name: asterisk
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.sip.port }}
+              name: sip
+              protocol: UDP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/asterisk
+          livenessProbe:
+            # Asterisk serves no HTTP. Talking to the running instance over the
+            # control socket is the only real health signal.
+            exec:
+              command: ["asterisk", "-rx", "core show uptime"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            exec:
+              command: ["asterisk", "-rx", "core show uptime"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: config
+          emptyDir: {}
+        - name: overlay
+          configMap:
+            name: asterisk
+        - name: overlay-secret
+          secret:
+            secretName: asterisk-pjsip-auth

@@ -38,6 +38,21 @@ There is deliberately no long-lived token Secret. The previous configuration
 shipped a legacy `kubernetes.io/service-account-token` bound to `cluster-admin`
 that never expired and could not be revoked without deleting the ServiceAccount.
 
+## Ports that are not HTTP
+
+Two apps are not reached through Traefik, and both need a matching hole in
+`networking.firewall` in `hosts/server01/default.nix` -- a NixOS deploy, not a
+git push:
+
+- `minecraft` -- TCP 25565, exposed the ordinary way with a `LoadBalancer`
+  Service served by k3s' klipper.
+- `asterisk` -- UDP 5160 plus the RTP range 10000-10099, exposed with
+  `hostNetwork: true` because a Service cannot express a port range. See
+  [pbx.md](pbx.md).
+
+Forgetting the deploy is the usual reason a new port "doesn't work" while the
+pod looks perfectly healthy.
+
 ## Secrets
 
 Cluster secrets are [SealedSecrets](https://github.com/bitnami-labs/sealed-secrets):

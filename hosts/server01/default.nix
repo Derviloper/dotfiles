@@ -73,7 +73,18 @@
         6443 # Kubernetes API Server
         25565 # Minecraft
       ];
-      allowedUDPPorts = [ ];
+      # The asterisk pod runs with hostNetwork, so it binds here rather than
+      # behind a Service and this chain is its entire exposure surface. Keep
+      # both in step with kubernetes/cluster01/asterisk/values.yaml.
+      allowedUDPPorts = [
+        5160 # Asterisk SIP signalling
+      ];
+      allowedUDPPortRanges = [
+        {
+          from = 10000;
+          to = 10099;
+        } # Asterisk RTP media
+      ];
       allowPing = true;
       pingLimit = "2/second";
       extraInputRules = ''
