@@ -7,12 +7,20 @@ configs:
     # stayed false and secret.createSecret stayed false -- leaving no local
     # admin and no SSO, i.e. no way to log in at all.
     #
-    # After the first sync, read the generated password and rotate it:
-    #   kubectl -n argocd get secret argocd-initial-admin-secret \
-    #     -o jsonpath='{.data.password}' | base64 -d
-    #   argocd account update-password
-    # Then seal the new bcrypt hash into argocd-secret as admin.password and
-    # delete argocd-initial-admin-secret.
+    # The rotation this comment used to describe -- log in with
+    # argocd-initial-admin-secret, then `argocd account update-password` --
+    # cannot work here, and left the login broken for 224 days. argocd-secret
+    # is *owned* by the SealedSecret below (ownerReferences, controller: true),
+    # so the controller reconciles its data down to exactly the keys it holds.
+    # The bcrypt hash argocd-server writes at bootstrap gets stripped on the
+    # next pass, leaving no admin.password for it to compare against, so every
+    # login fails no matter what you type.
+    #
+    # The hash therefore has to be sealed in, not written at runtime. To rotate:
+    #   argocd account bcrypt --password <new>
+    # then seal that as admin.password, with admin.passwordMtime set to now in
+    # RFC3339, into the same SealedSecret alongside the other keys. Changing
+    # passwordMtime is what invalidates sessions issued under the old password.
     admin.enabled: true
   # policy.csv previously granted to the authentik groups "ArgoCD Admins" and
   # "ArgoCD Viewers", which no longer exist. Restore group rules here when an
@@ -31,6 +39,8 @@ extraObjects:
       namespace: argocd
     spec:
       encryptedData:
+        admin.password: AgBoIFR/hD/mHn3nQeDr5LeNYaWm6nAlvmMCLXRTzZ0L7Kc2d2nPmqnyFokNtmYb+rOHIrf8E+9nBh4teksKn73GwHjk2uLXNJ6PZ9KfJSygjxZuxw4tCFe9yIU+8o4bgWUBSgDHxPU700Q1ZCUpJ1XaRotaVbB15VtDHZikc6DmB2cTW4+EF9CSw8mOIEcERW3/N26wI/tTkJqJVHXVgiyPVXf5I+8yPnDzTZBKbaTKAA92jvdmOCt9zDuJvAkavHyWaJeCDYqLYOl32WsChrZlIIudZ3pb2/RywFlpw1BnXEdrb1q96Q815hfmnCHcrDfH03PhAxfU+8NLh92f1vXWzFFoeBmUs1AHgWZa7E+1xfwLi5Sr4tPSkaG+CeFW5bdjtAlLoBA4RDS1pZKFovNgEkMH8JQWp7vM6RJYH4myUY05Hre3MaoV1a9nlP/aRPFRV9kmfUtI/Dmj25/+XSCf/xD7WMG4SkUg7CzAnbLfQvYee0fkVw+dKYOONTPb2etFBNt4/C7+8B8Km4u+xWcccYM6j/7vIhEm2dqhT+gSL3nYskU/Sx/0Ha5BRe5mbkFU8wnaeF5lguwizwwwJP9tuCnPrPatHcPcvCAAcdJ0giIR9+NXn/DHrRJlCOd44eV7zDW+roW+Ncd5m5NOKuR5fQrVBE7nibLnX3RiWirDHdqV3GBJbLvi46BEnt5DcRPgGxRMXyQVDFCIS127TxUMX/bmnLBeg2Jx5uXiYZQBmadVB+8bXJxTNQe72gt3nLgw0/Ty1JOr/vnpG/c=
+        admin.passwordMtime: AgAkCwCrsFSU3ZEtITdSQZUClvt/FUs9sxR6pigYf54RFWgZouqiKHKXidtBYycU3co7OAxcjpc5gFGVnYM4yXy939WoKS/sdGJ0j7b4HgJFtpD46gf6fY0bDT7TQJjtBHPdo3gthjIP2qhjrOlqA9aIAaG9cGuvNQy01Mjwaf6MxiXJy/XOodl0TOTU6eV+2bCTk2XQ9rPIve/sqffmcCa9QeFQBD72Z5RQpq+I71DTMBa/pcnU/wUtuqXS9E/QbKngDsSmURvX+EyOeS9kmjgPO7g8LC2quudl2O/YNi9doALClNvOjhphPuinvDU0unb8ZdGqvhPNK224Nl85HDrbYacgxKewkUOck8mYzkccb3jWoNgX7Cy3YqZAjFIW5d8hgDCTRVESvJxUYmnSS7IcYUiShewtNGdbtZOuJssjGTd5NoW0auQQul6YIhcG1Fw0sq6wpMhbwgSyd/B7mkrRObxP38m4awZwEprE0X4J12O2/q38GDUuCL7YSlbbu4VnfAHdpNntWRgKfgwPuxOqvblJKfQ12/cRcAXRc3+6XC9KelGWg2Z6aVW28YEe3AP45jwByeM1ZUMDmiDyLcuuB85vNCwP4BvILSr4uWhguNnetY55jianN+erl58Z8VIVCILDSkFZVPC41hVghIscnAzGZ5bkjgvTMVSEDxB4GemCJ1gz4e0GbUFKWCFkpYy1SvWxkLrIyVAWO57JKeqqb8zoIQ==
         server.secretkey: AgBdbTbMhgNuLzG07VLpA24S0qbKsLj8IfAUgIjFFVMJnbdq62n+j9epP/amVHN0gf0y1ZHTc2tmvpXElzYo4mGUJFOE6NRDsDS/ZGC0GcJcJdK/VcFQObcxe/Rl61KbpnhSI9HQVZxCoXBqMzhUe5bTt8EP5P65pDs4j46D4xlGK+WiWmvIG0P7UHWfCkhbi2yyyR1nd+vLizQxrdf8dO/zRk2h8s1y0Mwc/ByDjqdv+8t6y1Lv4sEvfZjJuGozCkahAEG+JsqDI1wmV3p/Vsl5KxOTkKRpKJUWi+QI/uZxRNXYzwFvQ520eizgwcjYj7Gt6ca/Y3mhnbWgRfJaZybt4CDUKbdm+kOYEAIqp/MXtkCnkEN8Cs8Z1nhbiaBzNsqY1iwsYu10cmE5K6LbM/d70lsyqAXZT6Heq42pKRxsQhYJl2KA6veQJzKGir2sDDChDcqM1c0UUX1KDOKjeuNNfT1deavEKSN+3S0oOiFjJPD/MEDyL22cxlFd0CqaY4b0MMd3PSgmgYJ3uu3ghIMl3jafwexWmkyUMfTnedRahL6MtbeMH+tygVrl+mYAkJzEfvXVYUKFQPdl/MPbYMITA8GjD52DUXjQHRunFYtsvGRGW8E2HbDnON/VN1CMrWYzUXq6jApUgE8L/ZpXlYKrCm5KG7jAqJn6am1ayCaHuunHynXRbmnOby1rPQK+R7kpVslenOwK6ccQj2kDyG7md+bCGFOfwqLDzbe3lCeShUX4StXzZMuZhQL4PmQzlHJbcDP7ONn3qJ/2aFsvC0A7
         webhook.github.secret: AgCKOF9OUIDT3G5db2XdGQH+arpJb9ITAEvYVkBl/SFM++ck/U/5ShVmEeeWbwjH4E049vcr7UZ40TgppjTqZGveckmPWi9vCR2zcA54m/5+wZIbBdjF+NT0EShU6Bgjo6YlTylqHJGxirQel0ODkH/jOmdGq7Kovt6OKA9maqpkLFC5+D6V/J+aAjadiiVDw9x43XAIspMirw/mNhFi9FiV8/tJiL0hVvltrvEPfvlHGAxVSoBRslkVqLIvDLX1bUAGY0bs7bjGsZ8qENyMapur2w36YivrWIG8bERTNB81P8zRtN6+QfmOzFhWVvfH9d2wpet2CymIACa03/og/tFTqDujVp3sezBQUJjY5mwKrAXaLbUIXrxVYaYBZXtpAlXHIAJ+iKMYT7TXvbiYKMEW36uKg0BkMA0Qg1lBlR6fS+awKCF1zP4WyZx87ZAGhLxQg1QF9Wv83qVbVgLZVv+HKoNc0DTzUtzBIgY5NjMvZUqK1BTd4dVXxowRWePR9K3ax0cn9D8283l9Duno+h+p4T1PXXpaWM0UsaEfcNI5QWPUSVskycCFOxvWEaKHJ9KWEHA38Q1eJDF44n44o+i4Qq4aV1dlyPfXpuXDGNP+HjVWfQKWHbmQ7rMB3i7GONEjDEnxIdUTf+9NtjBiaDooKk6krM6yfRewv8wRDli8hNyFtOikqRSrVUNyLnJiWnjtPQiEFuqJpbS/05WMxvt2SsW3QybRUXv1sbLvRVBSlNY5KRnee5ZG5vO307d0LbedddCkKgZAJN7gBlvDAhZ4
       template:
