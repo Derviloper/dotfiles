@@ -5,6 +5,7 @@
     ./hardware.nix
     ../../profiles/desktop.nix
     ../../profiles/vmware-guest.nix
+    ../../modules/nixos/seed-dotfiles.nix
   ];
 
   boot.loader = {
