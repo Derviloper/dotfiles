@@ -17,7 +17,7 @@ jobs:
     name: Lint and evaluate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |
@@ -34,7 +34,7 @@ jobs:
       matrix:
         host: [homelab, server01]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |
@@ -47,7 +47,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Free runner disk space
         run: |
           sudo rm -rf /opt/hostedtoolcache /usr/local/lib/android /usr/share/dotnet
