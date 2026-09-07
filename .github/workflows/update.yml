@@ -18,7 +18,7 @@ jobs:
       - run: nix flake update
       # CI then builds all three toplevels against the PR, which is the human
       # gate that system.autoUpgrade never had.
-      - uses: peter-evans/create-pull-request@v7
+      - uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "flake: update inputs"
           title: "flake: update inputs"
