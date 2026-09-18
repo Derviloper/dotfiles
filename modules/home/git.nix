@@ -6,8 +6,7 @@
       user = {
         name = "Derviloper";
         email = "derviloper@gmx.de";
-        # Provisioned out of band -- see docs/secrets.md. Deliberately not
-        # shipped in this repo.
+        # Provisioned out of band, not shipped here -- see docs/secrets.md.
         signingKey = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
       };
       gpg.format = "ssh";

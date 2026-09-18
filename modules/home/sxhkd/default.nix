@@ -1,8 +1,7 @@
 { liveSource, pkgs, ... }:
 {
-  # bspwmrc launches `sxhkd &`, so the binary has to be on the session PATH.
-  # Shipped by the module that owns the config rather than a shared package
-  # list, so the two cannot drift apart again.
+  # bspwmrc launches `sxhkd &`, so it must be on the session PATH. Shipped by the
+  # module that owns the config so the two cannot drift apart.
   home.packages = [ pkgs.sxhkd ];
 
   xdg.configFile."sxhkd/sxhkdrc".source = liveSource "modules/home/sxhkd/sxhkdrc" ./sxhkdrc;

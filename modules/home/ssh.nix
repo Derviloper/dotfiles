@@ -7,11 +7,9 @@ in
     enable = true;
     enableDefaultConfig = false;
 
-    # ssh takes the FIRST value it obtains for each keyword, so anything in
-    # config.local wins over the blocks below. That is where a host's real
-    # address goes when it must not be published -- server01 sits behind
-    # Cloudflare, and committing its origin IP here would let anyone bypass
-    # the proxy. See docs/secrets.md.
+    # ssh takes the FIRST value for each keyword, so config.local wins over the
+    # blocks below. That is where an address that must not be published goes:
+    # server01's origin IP would let anyone bypass Cloudflare. See docs/secrets.md.
     includes = [ "config.local" ];
 
     settings = {

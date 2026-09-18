@@ -11,14 +11,13 @@
     ../../modules/home/vscode.nix
   ];
 
-  # This is the machine the repo is developed on, so window-manager configs are
-  # symlinked into the checkout rather than read from the store.
+  # The machine this repo is developed on, so window-manager configs symlink into
+  # the checkout rather than coming from the store.
   local.liveConfig.enable = true;
 
-  # Per-project toolchains pinned by each project's flake (nvm covers node
-  # projects that only ship an .nvmrc). The shell hook lives in
-  # profiles/desktop.nix: zsh is configured at system level here, so
-  # home-manager.enableZshIntegration has nothing to hook into.
+  # Per-project toolchains pinned by each project's flake (nvm covers projects
+  # that only ship an .nvmrc). The shell hook lives in profiles/desktop.nix, since
+  # zsh is configured at system level and enableZshIntegration has no hook here.
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;

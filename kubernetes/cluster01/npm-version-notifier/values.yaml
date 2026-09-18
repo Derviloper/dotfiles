@@ -3,9 +3,8 @@ image:
 specs: eslint nuxt oxlint oxlint-tsgolint pinia pixi.js playwright prettier rolldown tailwindcss tsdown typescript vite vitest vue
 cronTime: 0 */30 * * * *
 discordWebhookId: "1410572127786242130"
-# Memory limit, CPU request only -- see kubernetes/cluster01/asterisk/values.yaml
-# for why that asymmetry is the rule here. This one idles between cron ticks and
-# only wakes to query the npm registry, so the request is deliberately tiny.
+# Memory limit, CPU request only -- asterisk/values.yaml explains why. This idles
+# between cron ticks, so the request is deliberately tiny.
 resources:
   requests:
     cpu: 10m

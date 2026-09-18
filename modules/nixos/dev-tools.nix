@@ -1,6 +1,5 @@
-# The CLI and native toolchain, system-wide so that root gets the same tools.
-# The version managers need more than a package entry on NixOS, so each has
-# its own module.
+# The CLI and native toolchain, system-wide so root gets the same tools. The
+# version managers need more than a package entry on NixOS, hence a module each.
 { pkgs, ... }:
 {
   imports = [
@@ -9,9 +8,8 @@
     ./rustup.nix
   ];
 
-  # Not listed because every host already has them: curl and dig (dnsutils is
-  # the same package) from profiles/base.nix, ssh from services.openssh, and
-  # which from NixOS's required packages.
+  # Absent because every host has them already: curl and dig from
+  # profiles/base.nix, ssh from services.openssh, which from NixOS itself.
   environment.systemPackages = with pkgs; [
     file
     jq
@@ -20,8 +18,7 @@
     unzip
     wget
     zip
-    # NixOS only ships these two through environment.defaultPackages, which is
-    # a default a host can empty.
+    # Only in environment.defaultPackages, which a host can empty.
     rsync
     strace
 
@@ -36,8 +33,7 @@
     gnumake
     ninja
     pkg-config
-    # The gcc wrapper exposes only the compiler; cmake and plain Makefiles also
-    # call ar, ranlib and ld directly.
+    # The gcc wrapper exposes only the compiler, not ar, ranlib and ld.
     binutils
 
     gdb
@@ -48,13 +44,12 @@
     shfmt
   ];
 
-  # A cap_net_raw wrapper, so that ICMP (-I) and TCP (-T) probes work without
-  # sudo. It lives in /run/wrappers/bin, which comes first on PATH.
+  # A cap_net_raw wrapper in /run/wrappers/bin (first on PATH), so ICMP (-I) and
+  # TCP (-T) probes work without sudo.
   programs.traceroute.enable = true;
 
-  # The module adds utempter, so that panes show up in `who`. Its generated
-  # tmux.conf, though, pins three settings to values tmux itself has since
-  # moved away from; these are tmux's current defaults.
+  # The module adds utempter so panes show up in `who`, but its generated
+  # tmux.conf pins three settings to stale values; these are tmux's own defaults.
   programs.tmux = {
     enable = true;
     terminal = "tmux-256color";

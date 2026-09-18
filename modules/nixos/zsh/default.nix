@@ -1,7 +1,6 @@
 { pkgs, ... }:
 {
-  # Configured at system level rather than in home-manager so that root gets the
-  # same shell -- the reason this never lived in the home-manager tree.
+  # At system level rather than in home-manager so root gets the same shell.
   programs.zsh = {
     enable = true;
     autosuggestions.enable = true;

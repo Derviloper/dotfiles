@@ -1,6 +1,6 @@
-# Everything VMware-specific, in one place. Retiring the VM is deleting this
-# file and one host directory -- which is why the ENS1371 audio workaround lives
-# here rather than in modules/nixos/desktop/sound.nix.
+# Everything VMware-specific in one place, so retiring the VM is deleting this
+# file and one host directory. Hence the ENS1371 workaround living here rather
+# than in modules/nixos/desktop/sound.nix.
 { lib, pkgs, ... }:
 {
   virtualisation.vmware.guest.enable = true;
@@ -22,9 +22,8 @@
     ];
   };
 
-  # VMware's emulated audio chip (ENS1371) has jittery IRQ delivery; the
-  # default 1024-frame period drains before the next interrupt arrives.
-  # Larger period + generous headroom absorbs the jitter.
+  # ENS1371 has jittery IRQ delivery and the default 1024-frame period drains
+  # before the next interrupt arrives; a larger period absorbs it.
   services.pipewire.wireplumber.extraConfig."51-vmware-alsa-buffers" = {
     "monitor.alsa.rules" = [
       {

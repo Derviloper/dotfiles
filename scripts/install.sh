@@ -12,11 +12,9 @@ else
   target_host="$server"
 fi
 
-# Refuse to run if the disk disko would format is not the disk the target has.
-# This is the one mistake here that cannot be undone, and VPS images routinely
-# present /dev/vda where a bare-metal install had /dev/sda. Read the configured
-# device from the evaluated config rather than grepping disko.nix, so this can
-# never disagree with what disko will actually do.
+# The one mistake here that cannot be undone, and VPS images routinely present
+# /dev/vda where bare metal had /dev/sda. Read the device from the evaluated
+# config rather than grepping disko.nix, so this cannot disagree with disko.
 want=$(nix eval --raw ".#nixosConfigurations.$server.config.disko.devices.disk.main.device")
 have=$(ssh "$target_host" 'lsblk -dno PATH,SIZE,TYPE' | awk '$3 == "disk"')
 
@@ -33,17 +31,14 @@ extra_files=$(mktemp -d)
 cleanup() { rm -rf "$extra_files"; }
 trap cleanup EXIT
 
-# Not every host has secrets. homelab, for instance, only gained them for the
-# Tailscale auth key -- a host with none is still perfectly installable.
+# Not every host has secrets; one without them is still installable.
 if [ -d "hosts/$server/secrets" ]; then
   install -d -m755 "$extra_files/etc/ssh"
 
-  # The host SSH key is the root of trust for sops-nix: sops-nix converts it to
-  # an age identity at activation, so it must be in place before the first boot.
-  #
-  # Prefer the devShell's sops; otherwise take it from this flake's *locked*
-  # nixpkgs. The old `nix-shell -p sops` needed a nixpkgs channel, which a
-  # flakes-only machine has no reason to have configured.
+  # The host SSH key is the root of trust for sops-nix, which converts it to an
+  # age identity at activation, so it must exist before the first boot. Take sops
+  # from this flake's locked nixpkgs when the devShell's is absent; `nix-shell -p`
+  # would need a channel a flakes-only machine has no reason to have.
   if command -v sops >/dev/null 2>&1; then
     sops_cmd=(sops)
   else
@@ -55,8 +50,7 @@ if [ -d "hosts/$server/secrets" ]; then
   "${sops_cmd[@]}" decrypt "hosts/$server/secrets/ssh_host_ed25519_key" \
     >"$extra_files/etc/ssh/ssh_host_ed25519_key"
 
-  # Only the private half is encrypted. The public key is committed in plaintext
-  # -- it is a public key, and encrypting it just cost this script a decrypt.
+  # Only the private half is encrypted; decrypting a public key buys nothing.
   install -m 644 "hosts/$server/secrets/ssh_host_ed25519_key.pub" \
     "$extra_files/etc/ssh/ssh_host_ed25519_key.pub"
   extra_files_args=(--extra-files "$extra_files")

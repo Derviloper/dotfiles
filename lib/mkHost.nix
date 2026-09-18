@@ -1,6 +1,5 @@
-# Single host constructor. Everything that was duplicated verbatim across the
-# three old flakes -- specialArgs threading, the home-manager block, disko and
-# sops-nix wiring -- lives here exactly once.
+# Single host constructor: specialArgs threading, the home-manager block, and
+# the disko and sops-nix wiring, once for all hosts.
 {
   inputs,
   hostname,
@@ -26,17 +25,15 @@ inputs.nixpkgs.lib.nixosSystem {
         useUserPackages = true;
         extraSpecialArgs = { inherit inputs username; };
 
-        # Without this, a single unmanaged file in the way ("would be
-        # clobbered") aborts the whole activation -- so nothing home-manager
-        # owns gets updated, and the failure is only visible in the journal.
-        # Move the stray file aside instead and keep going.
+        # Without this, one unmanaged file in the way ("would be clobbered") aborts
+        # the whole activation, visibly only in the journal. Move it aside instead.
         backupFileExtension = "hm-bak";
 
         users.${username} = {
           imports = [ ../hosts/${hostname}/home.nix ];
 
-          # Set here rather than threaded through specialArgs, so modules can
-          # read config.home.homeDirectory instead of taking it as an argument.
+          # Set here, not threaded through specialArgs, so modules can read
+          # config.home.homeDirectory instead of taking an argument.
           home = {
             inherit username;
             homeDirectory = "/home/${username}";

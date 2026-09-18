@@ -41,8 +41,7 @@
     };
   };
 
-  # The authorized key comes from profiles/base.nix, which applies it to this
-  # host's primary user.
+  # The authorized key comes from profiles/base.nix.
   users.users.admin = {
     isNormalUser = true;
     extraGroups = [

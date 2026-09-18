@@ -3,28 +3,17 @@ global:
 configs:
   cm:
     exec.enabled: true
-    # Re-enabled. When authentik was removed, dex.config went with it but this
-    # stayed false and secret.createSecret stayed false -- leaving no local
-    # admin and no SSO, i.e. no way to log in at all.
-    #
-    # The rotation this comment used to describe -- log in with
-    # argocd-initial-admin-secret, then `argocd account update-password` --
-    # cannot work here, and left the login broken for 224 days. argocd-secret
-    # is *owned* by the SealedSecret below (ownerReferences, controller: true),
-    # so the controller reconciles its data down to exactly the keys it holds.
-    # The bcrypt hash argocd-server writes at bootstrap gets stripped on the
-    # next pass, leaving no admin.password for it to compare against, so every
-    # login fails no matter what you type.
-    #
-    # The hash therefore has to be sealed in, not written at runtime. To rotate:
+    # The only way in since authentik (and with it dex.config) was removed.
+    # argocd-secret is *owned* by the SealedSecret below, so the controller
+    # reconciles its data down to exactly the keys it holds and strips the bcrypt
+    # hash argocd-server writes at bootstrap -- leaving nothing to compare against.
+    # The hash must therefore be sealed in rather than set at runtime. To rotate:
     #   argocd account bcrypt --password <new>
-    # then seal that as admin.password, with admin.passwordMtime set to now in
-    # RFC3339, into the same SealedSecret alongside the other keys. Changing
-    # passwordMtime is what invalidates sessions issued under the old password.
+    # and seal it as admin.password alongside an RFC3339 admin.passwordMtime of
+    # now, which is what invalidates sessions issued under the old password.
     admin.enabled: true
-  # policy.csv previously granted to the authentik groups "ArgoCD Admins" and
-  # "ArgoCD Viewers", which no longer exist. Restore group rules here when an
-  # identity provider is reintroduced.
+  # policy.csv granted to authentik groups that no longer exist; restore group
+  # rules here if an identity provider is reintroduced.
   params:
     # Safe only because Traefik terminates TLS in front of argocd-server.
     server.insecure: true

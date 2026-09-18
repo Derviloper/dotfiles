@@ -23,23 +23,20 @@ spec:
         app.kubernetes.io/instance: asterisk
         app.kubernetes.io/name: asterisk
       annotations:
-        # Rolls the deployment when the dialplan or pjsip.conf changes. It does
-        # not cover the secret -- rotating a password needs a manual
-        # `kubectl -n asterisk rollout restart deploy/asterisk`.
+        # Rolls the deployment when the dialplan or pjsip.conf changes. Not the
+        # secret: rotating a password needs a manual `rollout restart`.
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       # RTP needs a contiguous UDP range, which a Service cannot express -- the
-      # LoadBalancer pattern minecraft uses would mean 100 enumerated ports and
-      # a 100-hostPort klipper DaemonSet. hostNetwork also puts Asterisk on the
-      # node's public address directly, so there is no NAT on the server side.
-      # The node firewall in hosts/server01/default.nix is the exposure surface.
+      # LoadBalancer pattern minecraft uses would mean 100 enumerated ports. This
+      # also puts Asterisk on the node's public address, so there is no NAT on the
+      # server side; hosts/server01/default.nix's firewall is the exposure surface.
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       initContainers:
-        # A read-only ConfigMap mounted over /etc/asterisk breaks two things:
-        # the image entrypoint chown -Rs that directory, and Asterisk wants it
-        # writable for astdb. So seed an emptyDir from the image's own configs
-        # and overlay ours on top.
+        # A read-only ConfigMap over /etc/asterisk breaks the entrypoint's
+        # chown -R and astdb, both of which need it writable. So seed an emptyDir
+        # from the image's own configs and overlay ours on top.
         - name: config
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: IfNotPresent
@@ -52,13 +49,11 @@ spec:
               cp -f /overlay/*.conf /config/
               cp -f /overlay-secret/*.conf /config/
               # The copies land root-owned, but asterisk drops to its own user
-              # before reading them, so 0640 without this chown locks it out of
-              # its own dialplan.
+              # before reading them -- 0640 alone would lock it out.
               chown -R asterisk:asterisk /config
               chmod 0640 /config/*.conf
-          # Kubernetes takes a pod's effective request as the larger of the sum
-          # of its containers and the largest init container, so this has to be
-          # set too or the init phase is scheduled as best-effort.
+          # A pod's effective request is the larger of its containers' sum and its
+          # largest init container, so without this the init phase is best-effort.
           resources:{{ .Values.resources | toYaml | nindent 12 }}
           volumeMounts:
             - name: config
@@ -76,17 +71,14 @@ spec:
               name: sip
               protocol: UDP
           resources:{{ .Values.resources | toYaml | nindent 12 }}
-          # No securityContext here on purpose. The init container's `chown`
-          # needs root, and the image's entrypoint chowns /var/lib/asterisk
-          # before dropping to the asterisk user itself -- so runAsNonRoot would
-          # break startup rather than harden it. Confinement for this pod comes
-          # from the node firewall and the trunkless dialplan; see values.yaml.
+          # No securityContext on purpose: the entrypoint chowns /var/lib/asterisk
+          # before dropping to the asterisk user, so runAsNonRoot would break
+          # startup rather than harden it. See values.yaml for what does confine it.
           volumeMounts:
             - name: config
               mountPath: /etc/asterisk
           livenessProbe:
-            # Asterisk serves no HTTP. Talking to the running instance over the
-            # control socket is the only real health signal.
+            # Asterisk serves no HTTP; the control socket is the only health signal.
             exec:
               command: ["asterisk", "-rx", "core show uptime"]
             initialDelaySeconds: 30

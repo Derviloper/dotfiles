@@ -14,9 +14,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Pinned rather than fetched from master by scripts/install.sh: this is the
-    # tool that partitions and installs a machine, so "whatever is on master
-    # today" is not a property you want during a from-scratch rebuild.
+    # Pinned rather than fetched from master by scripts/install.sh: this tool
+    # partitions and installs a machine, so master-of-the-day is not what you want.
     nixos-anywhere = {
       url = "github:nix-community/nixos-anywhere";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -71,8 +70,8 @@
         server01 = {
           username = "admin";
           deploy.sshUser = "admin";
-          # The guest builds its own toplevel. Flip to false and `nix copy` if it
-          # ever runs short of RAM while k3s is live.
+          # The guest builds its own toplevel; flip to false and `nix copy` if it
+          # runs short of RAM while k3s is live.
           deploy.remoteBuild = true;
         };
       };
@@ -83,8 +82,7 @@
 
       preCommit = git-hooks.lib.${system}.run {
         src = ./.;
-        # nixos-generate-config output is kept byte-identical, so the linters
-        # must not have opinions about it.
+        # Kept byte-identical to nixos-generate-config output; hands off.
         excludes = [ "hosts/.*/hardware\\.nix" ];
 
         hooks = {
@@ -146,11 +144,9 @@
         shellHook = ''
           ${preCommit.shellHook}
 
-          # `nix develop` always lands in bash. Hand over to the same zsh + p10k
-          # the hosts run -- but only for a genuinely interactive session.
-          # `nix develop -c <cmd>` and CI must stay in bash: there, $- has no
-          # `i`, and exec'ing a shell would mean the command never runs.
-          # Set NO_DEV_ZSH=1 to opt out.
+          # `nix develop` always lands in bash; hand over to the same zsh + p10k the
+          # hosts run, but only when interactive -- `nix develop -c <cmd>` and CI must
+          # stay in bash or the command never runs. NO_DEV_ZSH=1 opts out.
           case $- in
             *i*)
               if [ -t 0 ] && [ -z "''${NO_DEV_ZSH:-}" ] && command -v zsh > /dev/null 2>&1; then
@@ -161,17 +157,13 @@
         '';
 
         packages = with pkgs; [
-          # secrets
           sops
           age
           ssh-to-age
-          # deployment
           deploy-rs.packages.${system}.default
-          # kubernetes
           kubectl
           kubernetes-helm
           kubeseal
-          # nix tooling
           just
           nixfmt
           statix
@@ -184,19 +176,16 @@
       # One attrset rather than three `apps.${system}.<name>` paths: Nix merges
       # static attribute paths but rejects a repeated *dynamic* one.
       apps.${system} = {
-        # The deploy-rs binary from the locked input. `deploy.nodes` above builds
-        # its activation profiles with deploy-rs.lib from that same revision, so
-        # running the binary from `github:serokell/deploy-rs` (as the justfile
-        # used to) meant the two halves of a deployment could come from
-        # different versions. `just deploy` goes through here.
+        # `deploy.nodes` above builds its activation profiles with deploy-rs.lib
+        # from the locked input, so the binary must come from that same revision
+        # or the two halves of a deployment diverge. `just deploy` goes through here.
         deploy = {
           type = "app";
           meta.description = "deploy-rs, pinned to this flake's revision";
           program = "${deploy-rs.packages.${system}.default}/bin/deploy";
         };
 
-        # Used by scripts/install.sh, so that the installer is pinned by
-        # flake.lock like everything else it depends on.
+        # Used by scripts/install.sh, so the installer is pinned by flake.lock too.
         nixos-anywhere = {
           type = "app";
           meta.description = "nixos-anywhere, pinned; used by scripts/install.sh";
@@ -207,9 +196,7 @@
         # checkout and no credentials:
         #   nix --extra-experimental-features "nix-command flakes" \
         #     run github:Derviloper/dotfiles#install -- desktop01
-        #
-        # `just install <host>` is the other direction -- installing a remote
-        # host from desktop01, via scripts/install.sh.
+        # `just install <host>` is the other direction, via scripts/install.sh.
         install = {
           type = "app";
           meta.description = "Install a host onto the machine this runs on";
@@ -233,9 +220,8 @@
                 # the flags the outer `nix run` was given.
                 nixflags=(--extra-experimental-features "nix-command flakes")
 
-                # Refuse to format a disk the machine does not have. Read the
-                # device from the evaluated config so this cannot disagree with
-                # what disko is about to do.
+                # Refuse to format a disk the machine does not have, reading the
+                # device from the evaluated config so this cannot disagree with disko.
                 want=$(nix "''${nixflags[@]}" eval --raw \
                   "${self}#nixosConfigurations.$host.config.disko.devices.disk.main.device")
                 have=$(lsblk -dno PATH,SIZE,TYPE | awk '$3 == "disk"')

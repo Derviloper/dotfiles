@@ -11,7 +11,7 @@
   ];
 
   # German regional formats with an English UI. Headless hosts have no use for
-  # LC_TELEPHONE or LC_PAPER, so this stays out of modules/nixos/locale.nix.
+  # these, so they stay out of modules/nixos/locale.nix.
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "de_DE.UTF-8";
     LC_IDENTIFICATION = "de_DE.UTF-8";
@@ -24,11 +24,9 @@
     LC_TIME = "de_DE.UTF-8";
   };
 
-  # home-manager installs direnv and its nix-direnv wiring, but its shell
-  # integration hooks into home-manager's own zsh module -- and zsh is
-  # configured at system level here so that root gets the same shell. So the
-  # hook belongs here. mkAfter keeps it behind the p10k instant-prompt block,
-  # which has to come first.
+  # home-manager's direnv integration hooks into its own zsh module, but zsh is
+  # configured at system level here so root gets the same shell -- so the hook
+  # belongs here. mkAfter keeps it behind p10k's instant-prompt block.
   programs.zsh.interactiveShellInit = lib.mkAfter ''
     eval "$(${pkgs.direnv}/bin/direnv hook zsh)"
   '';

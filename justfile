@@ -6,10 +6,8 @@ bootstrap keyfile:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # That key is the only secret you ever type. It is your SSH auth to both
-    # servers, your git signing key, and the sops admin identity that decrypts
-    # everything else -- which is why one key is enough for the whole fleet.
-
+    # The only secret you ever type: SSH auth to both servers, your git signing
+    # key, and -- via ssh-to-age below -- the sops admin identity. One key, whole fleet.
     key="$HOME/.ssh/id_ed25519"
 
     if [ -e "$key" ] && ! cmp -s "{{ keyfile }}" "$key"; then
@@ -23,16 +21,13 @@ bootstrap keyfile:
     ssh-keygen -y -f "$key" > "$key.pub"
     chmod 644 "$key.pub"
 
-    # sops-nix derives each host's identity from its SSH host key; yours is
-    # derived the same way, which is why one key covers the whole fleet.
     install -d -m 700 "$HOME/.config/sops/age"
     ssh-to-age -private-key -i "$key" > "$HOME/.config/sops/age/keys.txt"
     chmod 600 "$HOME/.config/sops/age/keys.txt"
 
-    # Fail here rather than three commands later inside an install, where a
-    # wrong key surfaces as an unexplainable decryption error. The
-    # sealed-secrets controller key is the canary because it is a real secret
-    # encrypted to &admin -- the placeholder file this used to read is gone.
+    # Fail here rather than mid-install, where a wrong key surfaces as an
+    # unexplainable decryption error. The sealed-secrets controller key is the
+    # canary: a real secret encrypted to &admin.
     if ! sops decrypt hosts/server01/secrets/sealed-secrets-key.yaml > /dev/null 2>&1; then
       echo "That key cannot decrypt this repo's secrets -- wrong key?" >&2
       echo "It yields recipient: $(ssh-to-age < "$key.pub")" >&2
@@ -68,10 +63,6 @@ boot:
     sudo nixos-rebuild boot --flake ".#$(hostname)"
 
 # Dry-run a remote activation. Always run this before `deploy`.
-#
-# `.#deploy` rather than `github:serokell/deploy-rs`: the activation profile in
-# deploy.nodes is built by the *locked* deploy-rs lib, so fetching the binary
-# from master meant the two halves could come from different versions.
 dry-deploy host:
     nix run .#deploy -- ".#{{ host }}" --dry-activate
 
@@ -92,8 +83,7 @@ fetch-cert host="server01":
     kubeseal --controller-namespace sealed-secrets --controller-name sealed-secrets --fetch-cert > local/{{ host }}/sealed-secrets-certificate.pem
 
 # Seal a Kubernetes Secret for committing. Must match the host `fetch-cert` ran
-# against -- sealing with the wrong cluster's cert produces a SealedSecret that
-# silently never decrypts.
+# against; the wrong cluster's cert yields a SealedSecret that never decrypts.
 seal host="server01":
     ./scripts/create-secret.sh {{ host }}
 
@@ -101,10 +91,9 @@ seal host="server01":
 update:
     nix flake update
 
-# --- live-config reload targets -------------------------------------------
-# These only do anything on the machine with local.liveConfig.enable = true,
-# where ~/.config/{bspwm,eww,sxhkd} symlink back into this checkout. Editing a
-# different checkout silently has no effect, so refuse to run from one.
+# The watch-* targets below only work on the machine with local.liveConfig.enable
+# = true, where ~/.config/{bspwm,eww,sxhkd} symlink into this checkout. Editing a
+# different checkout has no effect, so _assert-live refuses to run from one.
 
 _assert-live:
     #!/usr/bin/env bash

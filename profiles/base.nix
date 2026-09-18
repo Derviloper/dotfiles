@@ -1,5 +1,4 @@
-# Imported by every host. This is the layer whose absence let locale, nix
-# settings and the openssh block drift into three near-identical copies.
+# Imported by every host: locale, nix settings and the openssh block.
 { pkgs, username, ... }:
 {
   imports = [
@@ -9,14 +8,10 @@
     ../modules/nixos/zsh
   ];
 
-  # There is exactly one of these for the whole fleet -- it is the key
-  # `just bootstrap` installs, and it is simultaneously SSH auth to every host,
-  # the git signing key, and the sops admin identity (see docs/install.md).
-  # Declared here rather than in each host's default.nix, where it was three
-  # verbatim copies of one string.
-  #
-  # `username` comes from the host table in flake.nix via mkHost's specialArgs,
-  # so this lands on whichever account that host calls its primary one.
+  # One key for the whole fleet: `just bootstrap` installs it, and it is SSH auth
+  # to every host, the git signing key and the sops admin identity (docs/install.md).
+  # `username` comes from flake.nix's host table via mkHost's specialArgs, so this
+  # lands on whichever account that host calls primary.
   users.users.${username}.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGzW3FD/tVwU7NsMUT0tEclsw+MC17lMGq2u7XjEPhbd"
   ];
@@ -29,7 +24,6 @@
     vim
   ];
 
-  # deploy-rs activates over sudo. See the README for why this is a deliberate
-  # choice rather than an oversight.
+  # deploy-rs activates over sudo; the README explains the tradeoff.
   security.sudo.wheelNeedsPassword = false;
 }

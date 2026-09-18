@@ -1,7 +1,6 @@
-# nvm is a set of shell functions rather than a binary, so nixpkgs does not
-# package it. The scripts come from the store; each user's ~/.nvm stays a real,
-# writable directory, because that is where `nvm install` puts node versions.
-# Those are prebuilt, unpatched binaries -- they run only because of nix-ld.
+# nvm is shell functions rather than a binary, so nixpkgs does not package it.
+# The scripts come from the store; ~/.nvm stays a real writable directory because
+# that is where `nvm install` puts node -- prebuilt binaries that run via nix-ld.
 { lib, pkgs, ... }:
 let
   nvm = pkgs.fetchFromGitHub {
@@ -14,15 +13,13 @@ in
 {
   imports = [ ./nix-ld.nix ];
 
-  # zsh is configured at system level (modules/nixos/zsh), so the hook goes
-  # there. Order 1400 puts it behind the p10k instant-prompt block, which has to
-  # come first, and ahead of direnv's mkAfter hook, so that a project's .envrc
-  # still has the last word on PATH.
+  # Order 1400 puts this behind p10k's instant-prompt block, which must come
+  # first, and ahead of direnv's mkAfter hook, so a project's .envrc still has the
+  # last word on PATH.
   #
-  # nvm.sh keeps an NVM_DIR that is already set, but `nvm exec` and `nvm run`
-  # call "$NVM_DIR/nvm-exec", which in turn sources nvm.sh from the directory
-  # it was called by -- without resolving the link. Hence both links. -ef is a
-  # builtin test, so a shell that already has them does not fork.
+  # Both links are needed: `nvm exec` runs "$NVM_DIR/nvm-exec", which sources
+  # nvm.sh from its own directory without resolving the link. -ef is a builtin, so
+  # a shell that already has them does not fork.
   programs.zsh.interactiveShellInit = lib.mkOrder 1400 ''
     export NVM_DIR="$HOME/.nvm"
     for f in nvm.sh nvm-exec; do

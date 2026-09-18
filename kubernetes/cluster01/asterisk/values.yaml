@@ -1,52 +1,41 @@
 image:
   repository: andrius/asterisk
-  # Asterisk 22 LTS. Renovate's helm-values manager sees repository+tag, but the
-  # _debian-trixie suffix is not semver, so expect to bump this by hand.
+  # Asterisk 22 LTS. The _debian-trixie suffix is not semver, so Renovate's
+  # helm-values manager cannot bump it -- do it by hand.
   tag: 22.10.1_debian-trixie
 sip:
-  # Not 5060, which is scanned around the clock -- this drops the REGISTER and
-  # OPTIONS flood to near zero. Being honest about it: this repo is public, so
-  # the port is public too. It defeats untargeted scanning, not someone reading
-  # this file. The controls that actually matter are the trunkless dialplan in
-  # templates/configmap.yaml and 32-character random passwords.
-  #
-  # Changing this means changing allowedUDPPorts in hosts/server01/default.nix
-  # and the SIP Server field on both phones.
+  # Not 5060, which is scanned around the clock. This defeats untargeted
+  # scanning, not someone reading this public repo -- the controls that matter
+  # are the trunkless dialplan in templates/configmap.yaml and 32-character
+  # passwords. Changing it means changing allowedUDPPorts in
+  # hosts/server01/default.nix and the SIP Server field on both phones.
   port: 5160
 rtp:
   # 100 ports is ~25 concurrent call legs, far more than two handsets can use.
   # Must match allowedUDPPortRanges in hosts/server01/default.nix.
   start: 10000
   end: 10099
-# Memory gets a limit, CPU only a request. That asymmetry is deliberate and is
-# the same everywhere in this cluster:
-#
-# - Memory is incompressible. Without a limit, one leaking pod takes the whole
-#   node down with it -- on a single-node cluster that means the control plane,
-#   because kubelet starts evicting once the node is under memory pressure.
-# - A CPU limit does not prevent that; it just throttles. Throttling a process
-#   that has to put an RTP packet on the wire every 20ms is exactly how you get
-#   choppy audio, and there are no other tenants here to protect. The request
-#   is what buys a guaranteed share under contention.
+# Memory gets a limit, CPU only a request -- deliberate, and the same everywhere
+# in this cluster. Memory is incompressible, so one leaking pod takes down a
+# single-node control plane. A CPU limit only throttles, and throttling a process
+# that owes an RTP packet every 20ms is how you get choppy audio; the request
+# still buys a guaranteed share under contention.
 resources:
   requests:
     cpu: 50m
     memory: 128Mi
   limits:
     memory: 256Mi
-# Deliberately absent, so that removing them later is a decision rather than an
-# oversight:
+# Deliberately absent, so adding them later is a decision rather than an oversight:
 #
-# - TLS/SRTP. Signalling and audio cross the public internet in the clear.
-#   Encrypting them needs a real certificate for Asterisk, i.e. cert-manager as
-#   a new cluster app with a Cloudflare DNS-01 issuer reusing the token in
-#   traefik/values.yaml, or scraping Traefik's acme.json. The Asterisk side is
-#   then a transport-tls section plus media_encryption=sdes on the endpoints.
-# - Persistence. No PVC, so a pod restart drops the registrations; the phones
-#   re-register within their 2 minute expiry. Nothing here is worth keeping
-#   across a restart -- no voicemail, no CDR.
-# - fail2ban. The security log lives inside the pod, and with no trunk the worst
-#   a brute force achieves is ringing the other handset.
+# - TLS/SRTP: signalling and audio cross the internet in the clear. Encrypting
+#   needs a real cert for Asterisk (cert-manager with a Cloudflare DNS-01 issuer
+#   reusing traefik/values.yaml's token), then transport-tls plus
+#   media_encryption=sdes on the endpoints.
+# - Persistence: no PVC, so a restart drops registrations and the phones
+#   re-register within their 2 minute expiry. No voicemail, no CDR to keep.
+# - fail2ban: the security log lives in the pod, and with no trunk a brute force
+#   at worst rings the other handset.
 extraObjects:
   - apiVersion: bitnami.com/v1alpha1
     kind: SealedSecret

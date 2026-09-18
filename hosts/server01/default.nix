@@ -36,12 +36,10 @@
       enable = true;
       role = "server";
 
-      # Pinned so that a nixpkgs bump cannot silently move the Kubernetes
-      # control plane: 25.11 defaulted to 1.34 and 26.05 defaults to 1.35, and
-      # an unpinned `services.k3s.package` would have carried the cluster across
-      # that boundary inside an unrelated deploy. Currently identical to the
-      # nixpkgs default, so this is a no-op until the next release. Bump it as
-      # its own change, one minor at a time -- k3s does not support downgrades.
+      # Pinned so a nixpkgs bump cannot move the control plane inside an unrelated
+      # deploy (25.11 defaulted to 1.34, 26.05 to 1.35). Currently the nixpkgs
+      # default anyway. Bump as its own change, one minor at a time -- k3s does
+      # not support downgrades.
       package = pkgs.k3s_1_35;
 
       disable = [ "traefik" ];
@@ -50,15 +48,12 @@
         argocd = {
           name = "argo-cd";
           repo = "https://argoproj.github.io/argo-helm";
-          # This is the *bootstrap* Argo CD, installed by NixOS before Argo CD
-          # manages itself. Renovate only watches kubernetes/**/application.yaml,
-          # so it will never bump this -- keep it in step with
-          # kubernetes/cluster01/argocd/application.yaml by hand. Drift here is
-          # invisible until server01 is reinstalled from scratch.
-          #
-          # After changing the version, refresh the hash with:
+          # The *bootstrap* Argo CD, installed by NixOS before Argo CD manages
+          # itself. Renovate only watches kubernetes/**/application.yaml, so keep
+          # this in step with kubernetes/cluster01/argocd/application.yaml by hand;
+          # drift is invisible until server01 is reinstalled. After a version
+          # change, refresh the hash from the `got:` value in the mismatch error of:
           #   nix build .#nixosConfigurations.server01.config.system.build.toplevel
-          # and copy the `got:` value from the mismatch error.
           version = "8.3.0";
           hash = "sha256-pIfbHJ4vafOPttJ/4ZupkObWQHl77KeOhFszkc4jkaQ=";
           targetNamespace = "argocd";
@@ -85,9 +80,8 @@
         6443 # Kubernetes API Server
         25565 # Minecraft
       ];
-      # The asterisk pod runs with hostNetwork, so it binds here rather than
-      # behind a Service and this chain is its entire exposure surface. Keep
-      # both in step with kubernetes/cluster01/asterisk/values.yaml.
+      # The asterisk pod runs with hostNetwork, so this chain is its entire
+      # exposure surface. Keep in step with kubernetes/cluster01/asterisk/values.yaml.
       allowedUDPPorts = [
         5160 # Asterisk SIP signalling
       ];
@@ -108,8 +102,7 @@
     nftables.enable = true;
   };
 
-  # The authorized key comes from profiles/base.nix, which applies it to this
-  # host's primary user.
+  # The authorized key comes from profiles/base.nix.
   users.users.admin = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];

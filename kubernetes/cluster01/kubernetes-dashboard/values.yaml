@@ -1,17 +1,13 @@
-# Two things were removed here, both left unsafe when authentik was dropped:
+# Both removed when authentik was dropped left this unsafe:
 #
-# 1. The kubernetes.derviloper.de IngressRoute. It lost its authentik forwardAuth
-#    middleware, leaving a public login page in front of a cluster-admin-capable
-#    dashboard. Reach it over a port-forward instead:
+# 1. The kubernetes.derviloper.de IngressRoute lost its forwardAuth middleware,
+#    leaving a public login page in front of a cluster-admin dashboard. Use:
 #      kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
-#
-# 2. The dashboard-admin-token Secret. It was a legacy
-#    kubernetes.io/service-account-token: a cluster-admin bearer token that never
-#    expires and cannot be revoked without deleting the ServiceAccount. Mint a
-#    short-lived one when you actually need it:
+# 2. The dashboard-admin-token Secret was a never-expiring cluster-admin bearer
+#    token, unrevokable without deleting the ServiceAccount. Mint one per use:
 #      kubectl -n kubernetes-dashboard create token dashboard-admin --duration=1h
 #
-# The ServiceAccount and its binding stay, so token minting still works.
+# The ServiceAccount and its binding stay, so minting still works.
 extras:
   manifests:
     - apiVersion: v1
@@ -38,8 +34,7 @@ kong:
     tls:
       enabled: false
 
-# NOTE: the Kubernetes Dashboard project was archived in January 2026 and its
-# chart repo moved from kubernetes.github.io/dashboard (now 404) to
+# The project was archived in January 2026 and its chart repo moved to
 # kubernetes-retired.github.io/dashboard. The pin still resolves, but this is an
-# unmaintained component holding a cluster-admin binding. Worth replacing with
-# k9s or Headlamp, or dropping entirely.
+# unmaintained component holding a cluster-admin binding -- worth replacing with
+# k9s or Headlamp, or dropping.

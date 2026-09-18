@@ -1,10 +1,9 @@
-# The traefik.derviloper.de IngressRoute to api@internal was removed. It lost
-# its oauth2-proxy forwardAuth middleware when authentik was dropped, leaving
-# /api/rawdata -- the full router, service and middleware topology -- publicly
-# readable. Reach the dashboard over a port-forward instead:
+# The traefik.derviloper.de IngressRoute to api@internal was removed: it lost its
+# forwardAuth middleware when authentik was dropped, leaving /api/rawdata -- the
+# full router and middleware topology -- publicly readable. Do not re-add a public
+# route without authentication in front. Reach the dashboard with:
 #   kubectl -n traefik port-forward deploy/traefik 9000:9000
 #   open http://127.0.0.1:9000/dashboard/
-# Do not re-add a public route without an authentication middleware in front.
 ports:
   web:
     port: 80
@@ -15,11 +14,9 @@ ports:
         scheme: https
         permanent: true
     forwardedHeaders:
-      # Cloudflare's published edge ranges (cloudflare.com/ips). Anchored here
-      # and aliased by the websecure entrypoint below: the two were maintained
-      # as separate verbatim copies, so refreshing the list meant remembering
-      # to do it twice, and a half-updated pair means X-Forwarded-For from the
-      # missing range is silently ignored.
+      # Cloudflare's published edge ranges (cloudflare.com/ips), anchored here and
+      # aliased by websecure below. Kept as one copy because a half-updated pair
+      # silently ignores X-Forwarded-For from the missing range.
       trustedIPs: &cloudflare-ips
         - 173.245.48.0/20
         - 103.21.244.0/22

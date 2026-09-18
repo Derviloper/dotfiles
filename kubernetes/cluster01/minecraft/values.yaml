@@ -7,20 +7,13 @@ minecraftServer:
   motd: "\\u00a7bDerviloper\\u00a76 Minecraft Server\\u00a7c \\u2665"
 extraEnv:
   USE_MEOWICE_FLAGS: "TRUE"
-# A request but deliberately NO memory limit, which is the opposite of the rule
-# the other apps here follow.
-#
-# The request is the part that matters: this is by far the largest consumer on
-# the node, and without it the scheduler and kubelet both believed it needed
-# nothing. Under memory pressure kubelet evicts pods that exceed their requests
-# first, so declaring 4Gi is what stops this from being ranked alongside the
-# control plane.
-#
-# The limit is left off because a JVM given a 4G heap needs roughly 5-6Gi once
-# metaspace, GC structures, direct buffers and the JIT code cache are counted,
-# and a limit set below that does not throttle -- it OOM-kills the server
-# mid-session. Set one only alongside a real measurement of the node's RAM
-# (`free -g` on server01), and keep it above minecraftServer.memory + ~1.5Gi.
+# Deliberately NO memory limit, unlike the other apps here. The request is what
+# matters: this is the node's largest consumer, and kubelet evicts pods over
+# their request first, so declaring 4Gi keeps it from ranking alongside the
+# control plane. A limit is omitted because a 4G heap really needs 5-6Gi once
+# metaspace, GC structures, direct buffers and the JIT cache are counted, and a
+# limit below that OOM-kills mid-session rather than throttling. Set one only
+# against a real `free -g` on server01, above minecraftServer.memory + ~1.5Gi.
 resources:
   requests:
     cpu: 500m

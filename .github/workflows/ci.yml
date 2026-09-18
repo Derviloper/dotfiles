@@ -4,8 +4,7 @@ on:
     branches: [main]
   pull_request:
   schedule:
-    # Nightly, so the expensive desktop01 closure gets built once a day rather
-    # than on every pull request.
+    # Nightly, so the expensive desktop01 closure builds once a day.
     - cron: "0 4 * * *"
 permissions:
   contents: read
@@ -22,8 +21,8 @@ jobs:
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
-      # Formatting, statix, deadnix, gitleaks and the deploy-rs checks. The
-      # toplevels are built separately below so this job stays fast.
+      # Formatting, statix, deadnix, gitleaks and deploy-rs checks; the toplevels
+      # build separately below so this job stays fast.
       - run: nix build --print-build-logs .#checks.x86_64-linux.formatting .#checks.x86_64-linux.pre-commit
       - run: nix flake check --no-build --print-build-logs
   build:
@@ -42,8 +41,8 @@ jobs:
       - run: nix build --print-build-logs ".#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel"
   build-desktop:
     name: Build desktop01
-    # X11 + Brave + VS Code + rustup is several GB and crowds a 14 GB runner,
-    # so it runs nightly and on main rather than per pull request.
+    # X11 + Brave + VS Code + rustup crowds a 14 GB runner, so this runs nightly
+    # and on main rather than per pull request.
     if: github.event_name == 'schedule' || github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:

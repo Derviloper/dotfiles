@@ -2,12 +2,9 @@ cluster:
   instances: 1
   storage:
     size: 1Gi
-  # Memory limit, CPU request only -- see kubernetes/cluster01/asterisk/values.yaml
-  # for why that asymmetry is the rule here.
-  #
-  # CNPG sizes shared_buffers from the memory *limit*, so lowering the limit
-  # shrinks the cache rather than causing an OOM kill; raising it is the knob to
-  # turn if queries start hitting disk.
+  # Memory limit, CPU request only -- asterisk/values.yaml explains why. CNPG
+  # sizes shared_buffers from the memory *limit*, so lowering it shrinks the cache
+  # rather than risking an OOM kill; raise it if queries start hitting disk.
   resources:
     requests:
       cpu: 100m
@@ -35,12 +32,10 @@ extraObjects:
           creationTimestamp: null
           name: postgresql-cluster-superuser
           namespace: postgresql
-# The `authentik` database and role were removed. Authentik itself was dropped
-# in Jan 2026, but this entry kept provisioning a role whose sealed password had
-# already been committed in plaintext elsewhere in the old history.
-#
-# Drop the leftover database and role on the cluster once (CNPG will not do it
-# for you -- the declarative databases list only ever creates):
+# The `authentik` database and role were removed: authentik was dropped in Jan
+# 2026, but this kept provisioning a role whose password was already in the old
+# history in plaintext. CNPG only ever creates from the declarative list, so drop
+# the leftovers on the cluster once:
 #   kubectl -n postgresql exec -it postgresql-cluster-1 -- \
 #     psql -c 'DROP DATABASE IF EXISTS authentik' -c 'DROP ROLE IF EXISTS authentik'
 databases: []

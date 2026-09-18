@@ -1,7 +1,6 @@
 # pyenv builds every CPython from source, and NixOS has no /usr/include or
 # /usr/lib for configure to search. Without the hook below, `pyenv install`
-# finishes with nothing but warnings while ssl, sqlite3, readline, ctypes and
-# tkinter are quietly left out.
+# succeeds with warnings while quietly dropping ssl, sqlite3, readline and tkinter.
 {
   config,
   lib,
@@ -73,10 +72,9 @@ let
     export CPPFLAGS="${cppflags}''${CPPFLAGS:+ $CPPFLAGS}"
     export LDFLAGS="${ldflags}''${LDFLAGS:+ $LDFLAGS}"
 
-    # Those rpaths point into the store, where the weekly GC deletes whatever a
-    # nixpkgs bump has left unreferenced -- and every interpreter built against
-    # it would stop starting. So each install roots its own runtime closure, and
-    # `pyenv uninstall` takes the root away with the version.
+    # Those rpaths point into the store, where the weekly GC collects whatever a
+    # nixpkgs bump left unreferenced, breaking every interpreter built against it.
+    # So each install roots its own closure; `pyenv uninstall` drops the root.
     after_install 'if [ "$STATUS" -eq 0 ]; then
       ${config.nix.package}/bin/nix-store --realise --add-root "$PREFIX/.nix-gc-root" ${runtimeClosure} > /dev/null ||
         echo "pyenv: could not add a GC root for $PREFIX" >&2

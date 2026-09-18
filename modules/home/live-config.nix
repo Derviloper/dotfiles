@@ -1,8 +1,7 @@
-# Window-manager configs are iterated on constantly, and a full rebuild per
-# keybinding tweak is painful. On the machine this repo is developed on, symlink
-# them straight into the checkout; everywhere else read them from the store, so
-# a fresh `nixos-rebuild --flake github:Derviloper/dotfiles#desktop01` is
-# self-contained and never produces a dangling symlink.
+# A full rebuild per keybinding tweak is painful, so on the machine this repo is
+# developed on the window-manager configs symlink into the checkout. Everywhere
+# else they come from the store, so a rebuild straight from GitHub is
+# self-contained and never leaves a dangling symlink.
 { config, lib, ... }:
 let
   cfg = config.local.liveConfig;
@@ -22,8 +21,7 @@ in
   };
 
   config = {
-    # Consumers take `liveSource` as a module argument and call it with the
-    # path relative to the repo root plus the store fallback.
+    # Consumers call it with a repo-relative path plus the store fallback.
     _module.args.liveSource =
       relPath: storePath:
       if cfg.enable then config.lib.file.mkOutOfStoreSymlink "${cfg.dir}/${relPath}" else storePath;
