@@ -29,14 +29,19 @@ ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub
 
 ```sh
 nix develop                       # sops, age, ssh-to-age
-sops hosts/server01/secrets/sops.yaml
+sops hosts/homelab/secrets/sops.yaml
 ```
 
 After changing recipients in `.sops.yaml`, re-key existing files:
 
 ```sh
-sops updatekeys hosts/server01/secrets/sops.yaml
+sops updatekeys hosts/homelab/secrets/sops.yaml
 ```
+
+server01 has no `sops.yaml`. It used to carry one holding a single placeholder
+value, `foo`, which was declared in `sops.secrets` and decrypted on every
+activation without anything ever reading it. Its only remaining secret,
+`sealed-secrets-key.yaml`, names its own `sopsFile`.
 
 ## Adding a secret
 
@@ -55,8 +60,11 @@ Two things are deliberately **not** in this repo:
   was previously committed sops-encrypted; it is now provisioned by hand, or via
   `nixos-anywhere --extra-files` alongside the host key. `modules/home/git.nix`
   expects it at `~/.ssh/id_ed25519.pub` for commit signing.
-- **`local/server01/sealed-secrets-certificate.pem`**, the sealed-secrets public
-  certificate used by `scripts/create-secret.sh`. `local/` is gitignored.
+- **`local/<host>/sealed-secrets-certificate.pem`**, the sealed-secrets public
+  certificate used by `scripts/create-secret.sh`. `local/` is gitignored. Pull
+  it with `just fetch-cert <host>`, and seal with the *same* host:
+  `just seal <host>`. A SealedSecret encrypted to the wrong cluster's
+  controller is accepted by the API server and then never decrypts.
 
 ## Blast radius
 

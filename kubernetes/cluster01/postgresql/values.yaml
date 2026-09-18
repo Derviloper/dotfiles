@@ -2,6 +2,18 @@ cluster:
   instances: 1
   storage:
     size: 1Gi
+  # Memory limit, CPU request only -- see kubernetes/cluster01/asterisk/values.yaml
+  # for why that asymmetry is the rule here.
+  #
+  # CNPG sizes shared_buffers from the memory *limit*, so lowering the limit
+  # shrinks the cache rather than causing an OOM kill; raising it is the knob to
+  # turn if queries start hitting disk.
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
   monitoring:
     enablePodMonitor: true
   enableSuperuserAccess: true

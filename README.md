@@ -102,9 +102,11 @@ A few choices that look wrong at a glance and are not:
 - **`nix.settings.trusted-users` includes `@wheel`.** deploy-rs pushes
   locally-built store paths, which are rejected without it. This is effectively
   root-equivalent -- a deliberate tradeoff for a single-operator fleet.
-- **`services.k3s.package` is pinned.** nixpkgs 25.11 defaulted to k3s 1.34 and
-  26.05 defaults to 1.35, so without the pin an OS upgrade would silently
-  upgrade the Kubernetes control plane. Bump it as its own change.
+- **`services.k3s.package` is pinned** to `k3s_1_35`. nixpkgs 25.11 defaulted to
+  k3s 1.34 and 26.05 defaults to 1.35, so without the pin an OS upgrade would
+  silently upgrade the Kubernetes control plane. Bump it as its own change, one
+  minor at a time -- k3s does not support downgrades, so the pin can only ever
+  be moved forward.
 - **The two `disko.nix` files for `desktop01` and `homelab` are near-identical
   and stay that way.** A disko file is read once, under stress, immediately
   before it destroys a disk. Factoring it into a shared function is how you

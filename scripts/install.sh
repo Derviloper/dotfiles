@@ -40,10 +40,20 @@ if [ -d "hosts/$server/secrets" ]; then
 
   # The host SSH key is the root of trust for sops-nix: sops-nix converts it to
   # an age identity at activation, so it must be in place before the first boot.
-  nix-shell -p sops --run "
-    sops decrypt hosts/$server/secrets/ssh_host_ed25519_key > $extra_files/etc/ssh/ssh_host_ed25519_key
-  "
-  chmod 600 "$extra_files/etc/ssh/ssh_host_ed25519_key"
+  #
+  # Prefer the devShell's sops; otherwise take it from this flake's *locked*
+  # nixpkgs. The old `nix-shell -p sops` needed a nixpkgs channel, which a
+  # flakes-only machine has no reason to have configured.
+  if command -v sops >/dev/null 2>&1; then
+    sops_cmd=(sops)
+  else
+    sops_cmd=(nix run --inputs-from . "nixpkgs#sops" --)
+  fi
+
+  # Create the file before writing to it, so the key is never briefly readable.
+  install -m 600 /dev/null "$extra_files/etc/ssh/ssh_host_ed25519_key"
+  "${sops_cmd[@]}" decrypt "hosts/$server/secrets/ssh_host_ed25519_key" \
+    >"$extra_files/etc/ssh/ssh_host_ed25519_key"
 
   # Only the private half is encrypted. The public key is committed in plaintext
   # -- it is a public key, and encrypting it just cost this script a decrypt.
@@ -56,7 +66,7 @@ else
   extra_files_args=()
 fi
 
-nix run github:nix-community/nixos-anywhere -- \
+nix run .#nixos-anywhere -- \
   --generate-hardware-config nixos-generate-config \
   "./hosts/$server/hardware.nix" \
   "${extra_files_args[@]}" \

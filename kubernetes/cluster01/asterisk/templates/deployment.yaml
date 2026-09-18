@@ -56,6 +56,10 @@ spec:
               # its own dialplan.
               chown -R asterisk:asterisk /config
               chmod 0640 /config/*.conf
+          # Kubernetes takes a pod's effective request as the larger of the sum
+          # of its containers and the largest init container, so this has to be
+          # set too or the init phase is scheduled as best-effort.
+          resources:{{ .Values.resources | toYaml | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: /config
@@ -71,6 +75,12 @@ spec:
             - containerPort: {{ .Values.sip.port }}
               name: sip
               protocol: UDP
+          resources:{{ .Values.resources | toYaml | nindent 12 }}
+          # No securityContext here on purpose. The init container's `chown`
+          # needs root, and the image's entrypoint chowns /var/lib/asterisk
+          # before dropping to the asterisk user itself -- so runAsNonRoot would
+          # break startup rather than harden it. Confinement for this pod comes
+          # from the node firewall and the trunkless dialplan; see values.yaml.
           volumeMounts:
             - name: config
               mountPath: /etc/asterisk

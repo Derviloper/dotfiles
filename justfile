@@ -30,8 +30,10 @@ bootstrap keyfile:
     chmod 600 "$HOME/.config/sops/age/keys.txt"
 
     # Fail here rather than three commands later inside an install, where a
-    # wrong key surfaces as an unexplainable decryption error.
-    if ! sops decrypt hosts/server01/secrets/sops.yaml > /dev/null 2>&1; then
+    # wrong key surfaces as an unexplainable decryption error. The
+    # sealed-secrets controller key is the canary because it is a real secret
+    # encrypted to &admin -- the placeholder file this used to read is gone.
+    if ! sops decrypt hosts/server01/secrets/sealed-secrets-key.yaml > /dev/null 2>&1; then
       echo "That key cannot decrypt this repo's secrets -- wrong key?" >&2
       echo "It yields recipient: $(ssh-to-age < "$key.pub")" >&2
       grep -E '&admin ' .sops.yaml >&2
@@ -66,11 +68,15 @@ boot:
     sudo nixos-rebuild boot --flake ".#$(hostname)"
 
 # Dry-run a remote activation. Always run this before `deploy`.
+#
+# `.#deploy` rather than `github:serokell/deploy-rs`: the activation profile in
+# deploy.nodes is built by the *locked* deploy-rs lib, so fetching the binary
+# from master meant the two halves could come from different versions.
 dry-deploy host:
-    nix run github:serokell/deploy-rs -- ".#{{ host }}" --dry-activate
+    nix run .#deploy -- ".#{{ host }}" --dry-activate
 
 deploy host: (dry-deploy host)
-    nix run github:serokell/deploy-rs -- ".#{{ host }}"
+    nix run .#deploy -- ".#{{ host }}"
 
 # Install a host from scratch over SSH (erases its disk).
 install host="server01":
@@ -85,9 +91,11 @@ fetch-cert host="server01":
     mkdir -p local/{{ host }}
     kubeseal --controller-namespace sealed-secrets --controller-name sealed-secrets --fetch-cert > local/{{ host }}/sealed-secrets-certificate.pem
 
-# Seal a Kubernetes Secret for committing.
-seal:
-    ./scripts/create-secret.sh
+# Seal a Kubernetes Secret for committing. Must match the host `fetch-cert` ran
+# against -- sealing with the wrong cluster's cert produces a SealedSecret that
+# silently never decrypts.
+seal host="server01":
+    ./scripts/create-secret.sh {{ host }}
 
 # Refresh flake inputs. CI builds the result on the PR.
 update:

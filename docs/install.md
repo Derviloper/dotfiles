@@ -81,8 +81,9 @@ Then everything else comes up on its own:
   your Home Assistant backup from its own UI. See
   [homelab-haos.md](homelab-haos.md).
 
-Both join the tailnet unattended, provided the Tailscale OAuth secret is set --
-see [secrets.md](secrets.md).
+`homelab` joins the tailnet unattended, provided the Tailscale OAuth secret is
+set -- see [secrets.md](secrets.md). `server01` is not on the tailnet at all: it
+is reached over ssh at the address in `~/.ssh/config.local`.
 
 ## Physical install, without the app
 

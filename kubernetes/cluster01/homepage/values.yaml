@@ -1,5 +1,13 @@
 image:
   tag: 1.0.0
+# Memory limit, CPU request only -- see kubernetes/cluster01/asterisk/values.yaml
+# for why that asymmetry is the rule here.
+resources:
+  requests:
+    cpu: 25m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
 extraObjects:
   - apiVersion: v1
     kind: Service

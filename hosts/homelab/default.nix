@@ -41,14 +41,13 @@
     };
   };
 
+  # The authorized key comes from profiles/base.nix, which applies it to this
+  # host's primary user.
   users.users.admin = {
     isNormalUser = true;
     extraGroups = [
       "wheel"
       "libvirtd"
-    ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGzW3FD/tVwU7NsMUT0tEclsw+MC17lMGq2u7XjEPhbd"
     ];
   };
 

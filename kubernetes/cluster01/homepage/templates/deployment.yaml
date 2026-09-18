@@ -27,3 +27,13 @@ spec:
             - containerPort: 3000
               name: http
               protocol: TCP
+          resources:{{ .Values.resources | toYaml | nindent 12 }}
+          # Binds 3000, so it needs no capabilities at all. readOnlyRootFilesystem
+          # is left off: the server writes its render cache under the app
+          # directory, and mounting that as an emptyDir is more moving parts than
+          # a static site is worth.
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL

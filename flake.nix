@@ -14,6 +14,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Pinned rather than fetched from master by scripts/install.sh: this is the
+    # tool that partitions and installs a machine, so "whatever is on master
+    # today" is not a property you want during a from-scratch rebuild.
+    nixos-anywhere = {
+      url = "github:nix-community/nixos-anywhere";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.disko.follows = "disko";
+    };
+
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -172,62 +181,86 @@
         ];
       };
 
-      # Runs *on* the machine being installed, so a bare NixOS ISO needs no
-      # checkout and no credentials:
-      #   nix --extra-experimental-features "nix-command flakes" \
-      #     run github:Derviloper/dotfiles#install -- desktop01
-      #
-      # `just install <host>` is the other direction -- installing a remote host
-      # from desktop01, via scripts/install.sh.
-      apps.${system}.install = {
-        type = "app";
-        program = lib.getExe (
-          pkgs.writeShellApplication {
-            name = "install-host";
-            runtimeInputs = [
-              pkgs.util-linux
-              pkgs.nixos-install-tools
-              inputs.disko.packages.${system}.disko
-            ];
-            text = ''
-              if [ $# -ne 1 ]; then
-                echo "usage: install <hostname>" >&2
-                echo "hosts: ${lib.concatStringsSep " " (lib.attrNames hosts)}" >&2
-                exit 1
-              fi
-              host=$1
+      # One attrset rather than three `apps.${system}.<name>` paths: Nix merges
+      # static attribute paths but rejects a repeated *dynamic* one.
+      apps.${system} = {
+        # The deploy-rs binary from the locked input. `deploy.nodes` above builds
+        # its activation profiles with deploy-rs.lib from that same revision, so
+        # running the binary from `github:serokell/deploy-rs` (as the justfile
+        # used to) meant the two halves of a deployment could come from
+        # different versions. `just deploy` goes through here.
+        deploy = {
+          type = "app";
+          meta.description = "deploy-rs, pinned to this flake's revision";
+          program = "${deploy-rs.packages.${system}.default}/bin/deploy";
+        };
 
-              # The ISO enables neither, and a nested nix call does not inherit
-              # the flags the outer `nix run` was given.
-              nixflags=(--extra-experimental-features "nix-command flakes")
+        # Used by scripts/install.sh, so that the installer is pinned by
+        # flake.lock like everything else it depends on.
+        nixos-anywhere = {
+          type = "app";
+          meta.description = "nixos-anywhere, pinned; used by scripts/install.sh";
+          program = "${inputs.nixos-anywhere.packages.${system}.default}/bin/nixos-anywhere";
+        };
 
-              # Refuse to format a disk the machine does not have. Read the
-              # device from the evaluated config so this cannot disagree with
-              # what disko is about to do.
-              want=$(nix "''${nixflags[@]}" eval --raw \
-                "${self}#nixosConfigurations.$host.config.disko.devices.disk.main.device")
-              have=$(lsblk -dno PATH,SIZE,TYPE | awk '$3 == "disk"')
+        # Runs *on* the machine being installed, so a bare NixOS ISO needs no
+        # checkout and no credentials:
+        #   nix --extra-experimental-features "nix-command flakes" \
+        #     run github:Derviloper/dotfiles#install -- desktop01
+        #
+        # `just install <host>` is the other direction -- installing a remote
+        # host from desktop01, via scripts/install.sh.
+        install = {
+          type = "app";
+          meta.description = "Install a host onto the machine this runs on";
+          program = lib.getExe (
+            pkgs.writeShellApplication {
+              name = "install-host";
+              runtimeInputs = [
+                pkgs.util-linux
+                pkgs.nixos-install-tools
+                inputs.disko.packages.${system}.disko
+              ];
+              text = ''
+                if [ $# -ne 1 ]; then
+                  echo "usage: install <hostname>" >&2
+                  echo "hosts: ${lib.concatStringsSep " " (lib.attrNames hosts)}" >&2
+                  exit 1
+                fi
+                host=$1
 
-              if ! grep -qE "^''${want}[[:space:]]" <<<"$have"; then
-                echo "ERROR: $host installs to '$want', which this machine does not have." >&2
-                echo "Disks here:" >&2
-                awk '{ print "  " $0 }' <<<"$have" >&2
-                exit 1
-              fi
+                # The ISO enables neither, and a nested nix call does not inherit
+                # the flags the outer `nix run` was given.
+                nixflags=(--extra-experimental-features "nix-command flakes")
 
-              echo "This ERASES $want on this machine and installs $host."
-              read -r -p "Type the hostname to confirm: " confirm
-              if [ "$confirm" != "$host" ]; then
-                echo "aborted" >&2
-                exit 1
-              fi
+                # Refuse to format a disk the machine does not have. Read the
+                # device from the evaluated config so this cannot disagree with
+                # what disko is about to do.
+                want=$(nix "''${nixflags[@]}" eval --raw \
+                  "${self}#nixosConfigurations.$host.config.disko.devices.disk.main.device")
+                have=$(lsblk -dno PATH,SIZE,TYPE | awk '$3 == "disk"')
 
-              disko --mode destroy,format,mount --flake "${self}#$host"
-              nixos-install --flake "${self}#$host" --no-root-passwd
-              echo "Installed. Reboot, then run: just bootstrap <your ssh key>"
-            '';
-          }
-        );
+                if ! grep -qE "^''${want}[[:space:]]" <<<"$have"; then
+                  echo "ERROR: $host installs to '$want', which this machine does not have." >&2
+                  echo "Disks here:" >&2
+                  awk '{ print "  " $0 }' <<<"$have" >&2
+                  exit 1
+                fi
+
+                echo "This ERASES $want on this machine and installs $host."
+                read -r -p "Type the hostname to confirm: " confirm
+                if [ "$confirm" != "$host" ]; then
+                  echo "aborted" >&2
+                  exit 1
+                fi
+
+                disko --mode destroy,format,mount --flake "${self}#$host"
+                nixos-install --flake "${self}#$host" --no-root-passwd
+                echo "Installed. Reboot, then run: just bootstrap <your ssh key>"
+              '';
+            }
+          );
+        };
       };
     };
 }

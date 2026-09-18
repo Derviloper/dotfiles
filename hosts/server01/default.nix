@@ -1,6 +1,7 @@
 {
   config,
   modulesPath,
+  pkgs,
   ...
 }:
 {
@@ -13,15 +14,9 @@
 
   time.timeZone = "Etc/UTC";
 
-  sops = {
-    defaultSopsFile = ./secrets/sops.yaml;
-    secrets = {
-      "foo" = { };
-      "sealed-secrets-key.yaml" = {
-        sopsFile = ./secrets/sealed-secrets-key.yaml;
-        key = "";
-      };
-    };
+  sops.secrets."sealed-secrets-key.yaml" = {
+    sopsFile = ./secrets/sealed-secrets-key.yaml;
+    key = "";
   };
 
   boot = {
@@ -41,12 +36,29 @@
       enable = true;
       role = "server";
 
+      # Pinned so that a nixpkgs bump cannot silently move the Kubernetes
+      # control plane: 25.11 defaulted to 1.34 and 26.05 defaults to 1.35, and
+      # an unpinned `services.k3s.package` would have carried the cluster across
+      # that boundary inside an unrelated deploy. Currently identical to the
+      # nixpkgs default, so this is a no-op until the next release. Bump it as
+      # its own change, one minor at a time -- k3s does not support downgrades.
+      package = pkgs.k3s_1_35;
+
       disable = [ "traefik" ];
 
       autoDeployCharts = {
         argocd = {
           name = "argo-cd";
           repo = "https://argoproj.github.io/argo-helm";
+          # This is the *bootstrap* Argo CD, installed by NixOS before Argo CD
+          # manages itself. Renovate only watches kubernetes/**/application.yaml,
+          # so it will never bump this -- keep it in step with
+          # kubernetes/cluster01/argocd/application.yaml by hand. Drift here is
+          # invisible until server01 is reinstalled from scratch.
+          #
+          # After changing the version, refresh the hash with:
+          #   nix build .#nixosConfigurations.server01.config.system.build.toplevel
+          # and copy the `got:` value from the mismatch error.
           version = "8.3.0";
           hash = "sha256-pIfbHJ4vafOPttJ/4ZupkObWQHl77KeOhFszkc4jkaQ=";
           targetNamespace = "argocd";
@@ -96,12 +108,11 @@
     nftables.enable = true;
   };
 
+  # The authorized key comes from profiles/base.nix, which applies it to this
+  # host's primary user.
   users.users.admin = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGzW3FD/tVwU7NsMUT0tEclsw+MC17lMGq2u7XjEPhbd"
-    ];
   };
 
   nix.settings.max-jobs = 4;

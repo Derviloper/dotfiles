@@ -15,6 +15,9 @@ regexes = [
   '''-----BEGIN AGE ENCRYPTED FILE-----''',
 ]
 paths = [
-  # Wholly sops-managed.
+  # Wholly sops-managed. Both hosts, not just server01 -- the regexes above
+  # happen to cover homelab's files too, but that is a property of how sops
+  # currently formats them, not something homelab was ever exempted from.
   '''hosts/server01/secrets/.*''',
+  '''hosts/homelab/secrets/.*''',
 ]

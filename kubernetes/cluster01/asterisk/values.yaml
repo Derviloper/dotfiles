@@ -18,6 +18,22 @@ rtp:
   # Must match allowedUDPPortRanges in hosts/server01/default.nix.
   start: 10000
   end: 10099
+# Memory gets a limit, CPU only a request. That asymmetry is deliberate and is
+# the same everywhere in this cluster:
+#
+# - Memory is incompressible. Without a limit, one leaking pod takes the whole
+#   node down with it -- on a single-node cluster that means the control plane,
+#   because kubelet starts evicting once the node is under memory pressure.
+# - A CPU limit does not prevent that; it just throttles. Throttling a process
+#   that has to put an RTP packet on the wire every 20ms is exactly how you get
+#   choppy audio, and there are no other tenants here to protect. The request
+#   is what buys a guaranteed share under contention.
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
 # Deliberately absent, so that removing them later is a decision rather than an
 # oversight:
 #
