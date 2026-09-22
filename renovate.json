@@ -17,7 +17,7 @@
       "automerge": false
     },
     {
-      "description": "n8n tags its beta line with plain semver on Docker Hub, indistinguishable from stable. GitHub marks those releases as prereleases, which Renovate skips.",
+      "description": "n8n tags its beta line with plain semver on Docker Hub, indistinguishable from stable. GitHub marks those releases as prereleases, which Renovate skips. The n8nio/runners sidecar reuses this tag, so it needs no rule of its own.",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["n8nio/n8n"],
       "overrideDatasource": "github-releases",
