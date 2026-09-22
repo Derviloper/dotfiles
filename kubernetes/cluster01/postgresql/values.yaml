@@ -38,4 +38,10 @@ extraObjects:
 # the leftovers on the cluster once:
 #   kubectl -n postgresql exec -it postgresql-cluster-1 -- \
 #     psql -c 'DROP DATABASE IF EXISTS authentik' -c 'DROP ROLE IF EXISTS authentik'
-databases: []
+databases:
+  # Sealed as postgresql-<name>-secret in this namespace -- the name
+  # templates/sealedsecret.yaml renders, and a value sealed under any other will
+  # not decrypt. The password is sealed again, as db-password, in n8n/values.yaml.
+  - name: n8n
+    username: AgAKjOpsiiTvoNJdPtV/vrBoX96HdPMqUYAmuqKLd92aPaqc0+aMEy9JiXnG7xErnSESlkpuq7Im/zr8ZmN8gy8M7RSkYPtcmTUma4NpRgdF15ozIXIeF7R+qOP6zrOmEu8YNhKCRG9uN2xX4Rnjg0/9zO7bBpPJuclDYALv2ijbbFjTJgHILyJ9csa1uEPmSAETWVdJxC1O6qqczrJ6P36bHwPGNjA9O7tkE2wsmItceZOKOpNNbVpOcz94J7q8nhPHC0E8IoNlUnDvPt0rzWfy/oPO7apDkcfjU9pWJH+NbQlXW4L4uqdmwWnAeh2tj4YFp64SkjnigluL1vJ0Tntq8wn9QWnQktalQrFtxsC+k9puKQjG66fktBVB9hlOFbXlE3EZKt4099maIHZmnqsYOmzRjmqVSrWBSYKg90saEqh5nCKzCGHknQekmDZhlqzRQcftcyqqeTSUDvxMDNMpniTac6pg55d8dtQIci6ffADtgHCd7njKL8FUb8TfwZycLZTgInk7/Y0TbSwmhUPs/WvxT4+W+XPehsfnf17hhR7WjN7idInE2Qp0pQz/q+orZamowwxXqMhUh/3vIGnyQFrZndLYnUIJsWdsSjSUXYHyT6nN0qjFo+9B3ZtS5b9C0w2UKRo4t72OY7f09UPoRrnVdY9JOD+oRMq9T7xwpe4PzqzSR6uTeKZgr02TE9+pGAs=
+    password: AgBB6yismMCgHjfhKflGwV6XUIu/Fk9xFXrXiDRL3gnZG/eEr38Kkukz1ZCaYicZVuadqjj9l0FcofYH0S3hx3HimG3yXboe8s3DxlyfFBYyJ0+3Q73rBxNkebN2snJ1WIcMsItQEkePgP049693AJUDI+bBiIOeCi9/fTeEP7NUCQrxeKYpzkJ5OY6VQMxo5heta4j0+KMEO30UQGRwaKWAdipe+t94ZUGbIHqIaFjHkl6csfna8aGMUykLm3uDR5nrm1To6CS/SRe0LW60pzS3eWLd5+ilOZ1IJ5l7agkd0nJGqJkvS+BLE9Y8U9Hsqv44kN15BRl/1b9qUHO0aEE8AJuJ7MJk5DorzknLTANQQq0+rnayeturBxbQHwI2cJCjcIN5i6xqX68jFagUybiyxm1buJOLTerW5J3yRwLUan6ah3BSFbod+9rLSU2AzPWrjyQ4J2YhGTq4BNU/eX7KokVs9y6JKKiKHzocTQtSQk3fYLh44BKLzEEPZ6+sqk1iikW7xxdM3cfmpEsKBFIaLRRvvvjW5C74Uk50Qw0ALQh7/ZWxABUI0BUJbXNaYCwGF1Fizk7HRRlucwLClqh/FnHVeHPce0h0MBbrW/Bo+j1qRczdMFPfPvF1zli3ctc1E6i/XwJevwG0I4dMNSlykUljB2W7OZ916lnc9f4DTGjFqyrF7mhw02TJsx+1BVv0KQoW2RlZLFN+htEVahIEr1sDL5hWjOHMnMo3qlXr0SXSTZHf+ntB

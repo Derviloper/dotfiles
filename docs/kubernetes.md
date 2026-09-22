@@ -38,6 +38,21 @@ There is deliberately no long-lived token Secret. The previous configuration
 shipped a legacy `kubernetes.io/service-account-token` bound to `cluster-admin`
 that never expired and could not be revoked without deleting the ServiceAccount.
 
+## n8n
+
+Published at `n8n.derviloper.de` behind its own login. Webhooks have to be
+reachable from outside anyway, so it does not follow the port-forward rule above.
+
+- The owner account comes from the `n8n` SealedSecret
+  (`N8N_INSTANCE_OWNER_MANAGED_BY_ENV`), not n8n's setup screen, which hands the
+  instance to whoever opens it first. The flip side: the owner password can only
+  be changed by resealing -- see `kubernetes/cluster01/n8n/values.yaml`.
+- Turn on two-factor for the owner in the UI after the first login. Enforcing it
+  is a paid feature, so nothing does it for you.
+- Workflows and credentials live only in the CNPG cluster, which has no backups
+  configured. Credentials are also encrypted with the sealed `encryption-key`;
+  without it a database restore is useless, so keep it outside this cluster too.
+
 ## Ports that are not HTTP
 
 Two apps are not reached through Traefik, and both need a matching hole in

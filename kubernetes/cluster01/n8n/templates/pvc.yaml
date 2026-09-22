@@ -1,0 +1,16 @@
+# Workflows, credentials and execution history live in Postgres. This holds what
+# n8n keeps on disk: installed community nodes and filesystem binary data.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n
+  namespace: n8n
+  labels:
+    app.kubernetes.io/instance: n8n
+    app.kubernetes.io/name: n8n
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}

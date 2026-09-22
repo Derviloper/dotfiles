@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+  namespace: n8n
+  labels:
+    app.kubernetes.io/instance: n8n
+    app.kubernetes.io/name: n8n
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  strategy:
+    # Two pods overlapping during a rolling update would both fire every
+    # schedule trigger.
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: n8n
+      app.kubernetes.io/name: n8n
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: n8n
+        app.kubernetes.io/name: n8n
+    spec:
+      # The `n8n` Service would otherwise inject N8N_PORT=tcp://10.43.x.x:80,
+      # which n8n reads as its own listen port and refuses to start on.
+      enableServiceLinks: false
+      # n8n never talks to the Kubernetes API.
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: n8n
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5678
+              name: http
+              protocol: TCP
+          env:
+            - name: DB_TYPE
+              value: postgresdb
+            - name: DB_POSTGRESDB_HOST
+              value: postgresql-cluster-rw.postgresql.svc.cluster.local
+            - name: DB_POSTGRESDB_DATABASE
+              value: n8n
+            - name: DB_POSTGRESDB_USER
+              value: n8n
+            # Secrets go in as *_FILE rather than secretKeyRef so they never sit in
+            # the process environment, which expressions and the Code node can read.
+            - name: DB_POSTGRESDB_PASSWORD_FILE
+              value: /etc/n8n/secrets/db-password
+            - name: N8N_ENCRYPTION_KEY_FILE
+              value: /etc/n8n/secrets/encryption-key
+            - name: N8N_BLOCK_ENV_ACCESS_IN_NODE
+              value: "true"
+            # A fresh instance hands the owner account to whoever opens it first.
+            # This creates it at startup instead, before the public route serves
+            # anything, and re-applies it on every boot -- so the password can only
+            # be changed by resealing, not from the UI.
+            - name: N8N_INSTANCE_OWNER_MANAGED_BY_ENV
+              value: "true"
+            - name: N8N_INSTANCE_OWNER_EMAIL_FILE
+              value: /etc/n8n/secrets/owner-email
+            - name: N8N_INSTANCE_OWNER_PASSWORD_HASH_FILE
+              value: /etc/n8n/secrets/owner-password-hash
+            - name: N8N_HOST
+              value: {{ .Values.host }}
+            - name: N8N_PROTOCOL
+              value: https
+            - name: N8N_EDITOR_BASE_URL
+              value: https://{{ .Values.host }}/
+            - name: N8N_WEBHOOK_URL
+              value: https://{{ .Values.host }}/
+            # Cloudflare, then Traefik. With 1 the client is always a Cloudflare
+            # edge address, and the login rate limiter buckets everyone together.
+            - name: N8N_PROXY_HOPS
+              value: "2"
+            # Blocks workflow requests to private ranges, which covers the pod and
+            # service CIDRs -- Loki and Prometheus answer anyone in-cluster.
+            - name: N8N_SSRF_PROTECTION_ENABLED
+              value: "true"
+            - name: GENERIC_TIMEZONE
+              value: {{ .Values.timezone }}
+            # Two V8 heaps share the memory limit: this process and the task runner
+            # child it spawns for Code nodes. Capping both below the limit turns a
+            # runaway workflow into a failed execution instead of an OOM kill.
+            - name: NODE_OPTIONS
+              value: --max-old-space-size={{ .Values.heap.main }}
+            - name: N8N_RUNNERS_MAX_OLD_SPACE_SIZE
+              value: "{{ .Values.heap.runner }}"
+          resources:{{ .Values.resources | toYaml | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /home/node/.n8n
+            - name: secrets
+              mountPath: /etc/n8n/secrets
+              readOnly: true
+          # Readiness only passes once the database is connected and migrated, and
+          # the first boot migrates an empty schema -- hence the long startup window.
+          startupProbe:
+            httpGet:
+              path: /healthz/readiness
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /healthz/readiness
+              port: http
+            periodSeconds: 10
+          # /healthz ignores the database, so a Postgres restart does not also
+          # restart n8n; it reconnects on its own.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: n8n
+        - name: secrets
+          secret:
+            secretName: n8n
+            defaultMode: 0440

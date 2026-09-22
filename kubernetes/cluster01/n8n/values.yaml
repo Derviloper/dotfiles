@@ -1,0 +1,51 @@
+image:
+  repository: n8nio/n8n
+  # n8n tags its beta line with plain semver too; renovate.json routes this
+  # through GitHub releases, where betas are flagged, so only stable bumps land.
+  tag: 2.39.10
+host: n8n.derviloper.de
+# Schedule triggers fire in this zone. server01 itself runs UTC.
+timezone: Europe/Berlin
+# Memory limit, CPU request only -- asterisk/values.yaml explains why. The two
+# V8 heaps below (MiB) leave ~250Mi of the limit for native memory, so raise all
+# three together.
+resources:
+  requests:
+    cpu: 100m
+    memory: 384Mi
+  limits:
+    memory: 1Gi
+heap:
+  main: 512
+  runner: 256
+persistence:
+  size: 1Gi
+# Plaintext for all four keys is in local/server01/n8n-secrets.txt on the
+# machine that sealed them.
+#
+# - db-password: the same value as postgresql-n8n-secret in
+#   postgresql/values.yaml. Change both together.
+# - encryption-key: encrypts every credential stored in the database. Never
+#   reseal a new value -- existing credentials become undecryptable. n8n has its
+#   own rotation procedure (N8N_ENV_FEAT_ENCRYPTION_KEY_ROTATION).
+# - owner-email, owner-password-hash: applied to the owner account at every
+#   boot. To change the password, replace just that key and restart:
+#     mkpasswd -m bcrypt -R 12 | tr -d '\n' | kubeseal --raw --from-file=/dev/stdin \
+#       --cert local/server01/sealed-secrets-certificate.pem --namespace n8n --name n8n
+#     kubectl -n n8n rollout restart deploy/n8n
+extraObjects:
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: n8n
+      namespace: n8n
+    spec:
+      encryptedData:
+        db-password: AgCNaZHpuIIaj9jzA7Wf6IY0dQWpbj+RU7IidG4O415EhDHKYnrnJWRk5N/yIhfoThlpb1+ck2Ssyc8T9zETeTM3c13k2RDkvD0H1Rf2/AGsRUuGvYWga1sqLk5gc+40yD9s6TBY/hJtWK5WqLtfu3KLzSExKDcejPxiPS7G8JuzRE1gJ8RpaSb5FH4V0C2dZFO/TeUnFiyubYTNl4BC9hrlrCbEEMosX0sNRhocvpRpufXXaFr2yjVFPrwTF/UyZTRGDJMtT2FKLZ8XZaq6j0SkleMNJKHY4t2X39EMHLn83HIlHhpRWLlLcfSL7PZsX0fbDJKC2zvGaTJpDkf34xx5a9BjoI4m9ieT3adFKMh9HbgjyQyPg15US9mBECfk0orhS8y8a+WK37Nr5QSRN+H/ZdM+FaZx5qKJQRrD+LXTZVZIxID5gNXGb85WihyE3wDqD+/Xi26J/1p1o8oIgGJ9YJGZea+c53SX5Qe05Fcchn9By9j/9+mpvXWO7jPHk2x4QVTVfapGmN4YWCuslvaX5dN1WJ9hPebA6iQ9SW/6QrrBpl2bnAzjaSPWYEd6E1v6Jx4pwG3JpG4l0thp4iX6kyEeKJBzqKNIeRm+df3Y8V26X2a23i8ZZiKCiP8cSwRaxrw45ksfQ8xHvIfU6Cmd/yOlhAtNEK/gxijcYcBQvCWir7Pog+rmfZLRzMvZ0casKbOtJP7LjnNvXwOXFqENqsA0Julb7Bidl3WRjeDgjau47remZMlN
+        encryption-key: AgAkoX+7pxVVyTxeRU3trfUPW6jp7xIgzwWqeROIfosQR+YbeanO8R7JHCoi4OI/EiODV0uCfwwnsg7puVT0uK/0QXJcuZ6XaMN1CcbwypuRrmxMXIZc4QF+gNv/u6wuNldLxanyTko0aNUP2TTN2fELyNt4FilhfuSg8cRUZ02XUz/DzZxRf8YBGgksDqRlCCPqm6KHNddgEzt+iJw1B3Y58QVwF8eJl79In+D7aNZBRG7Sa7EyIDGeMxTEYXSjvhDAHTQ0ZkaHFDSUKW8oxfzDoBKbZa/fqRZKPRrhAYuw3Wg6XyaMzLJQy3tti4yTVc2kJ6m6WFYlS3h1XzccgY+zYMm2IAgh4hyWNGNtfcItmrXwsSZvivKHEyjKSCZN69Yr2L/oSfa6B7UVIAmAMZys5/XjC5vwf2ot6NW76Lm7C7zIAbtCSvc+ETD/CwZTVbkhTiAtAt6pXLXFnIjx0j0vAL247ciN1ssSo87+eKRwOeY57wgZHS0Bdy2Vq643Hrf694LdCo1we+cMNhqBLdkekKRnG4PHEmvo+fF0TSWGAI2yUZhfQAhYRgZNBkIqoTdRiRgD/QZU3IUSQ1+2nDPHJjP4ul9pwTsjcb86z3VnuWj+4XhnCuvS3N2wpwrgcnZvwcQOW02yLAxOah/74f4wFpPiRxwsIrEJbF3SOb3HLreqFyfVyM4WS3Qm2CrbUEEBqdgJ+amUJHDu84+xpRShAY4R/EaUD6cuxHq9+RmAsvwxeG3FAUIF5f+9mJnXIMSxtcu37aaAhULCV/JA8Ymk
+        owner-email: AgBRl9K9kbR4RAHyek48UTIZqt4m6m/6K6ul9KVatDf67YvMKAJ++ErgY8VXWzijIEY9Cgyy1ZBSd5OH2IfFhmtnFnh06TR7GAZQ31jJ2Hjd/547VQJMfUvQwN4fEo+ac68WwhMr8nhADVXL7kQ8giX3XQ2WfyYxm+/lZRPelLSpLvLZ1julXrOQoSzCLqYLwvvGgH4+S55AUdW9B8Jmx78R5OaTPkmtPzAo0OtsoFLCowPxs2cIzSgwfWse+lMtneaI1xGHuIAbjBhgmgoOjtKVTTE0vupCR7n9tfaWbYcIB+zDmjI+epDoRZX81egWADBypI+gPFl82zsX8WLvFUHiOzxCVo+LApWbcE+XMDL5jHms7g3Y62JdX/c9XHty19hJX2UzutNQ8DD0DZ5rTBOcaH40vHIkSjFxVPJuKyAhOnLYiS6NFjhYsDj+TGG5coUAudOBjhLoZU5XC+cnIJhsrQPCBKAEwc3NXtTp2sI0HC9Xl4p5zAMb1uthrWxZHWsbgdVslaOuL3CGZ63Yhljoq+vOYkGrrqbHHfPtS6GL4hWNB+SmnQ03z1G7m1ZqxlU+2lRRjY3grTaK/nAlwGrKoyRbYOST4q9H5K3n0XZt/CaS+h1xrHXpKm72i09aWYrSPJAGqKXMh3JNWGaYrC1jNjUS476sfFomxlUn52eX3v3zixiIQehyzubxc+9uUbkSxtK5CydF8YZybtOfsrIxLQ==
+        owner-password-hash: AgAEqI/gm9SKg0egRkTVHWWn29gONDtTzKCwHgyyGZXZ5s+1ZnxEXWyyccQHbFsNOcMFykjc2too9WF6YrIFLIaaacqYSpn1GD7DnAM6KVMQkKc3jK4YIHOaWark6f9y0uj+8AoLbJFPEs6ir4IkxahUyCEQsXFCkDEofQnar72Vc50mV4BX05jAyhAKKudWL40Aq4hjtCa0G+SJmLb69iMgj2V1900167U9NT0oBmLgCfqaIUBKxgxF3OSZTK9Gthgx64nVTS701aVR2T8aIo3zIZWnTG7aFYlWKDjd/4VeCNzL4glnRX1wP5aUkXev+CzexmAi11dxaCq7AT0OP9RaiOOk75/MIv+VFa+WZJLLGPagnxxe6M7L7d4AjpojwYomgIyuZaCsCMTfW+umOlGUOLXTBKudYdH5YxvMRPLsMmTJ9Pxy2iuqxaOr8eagOWbIMzoudegnOM7prTMd4C9FvzOF2Ab+MIHPaxAJC1nJszero7SviHkXuJAMObpz5UbBsNKD/1lWSZ8a/rI2i5DA/rd18mu11BTo+y9H8JlSMBzGlI2OvYVh0UeD6BehJ+Vmk5mutwxl07llRg+KwfUpcgoF4gUDBexFA+BG8A3qb89nYhpPnZE6l3bL5IMMQ42B1772dZely4NLGIgy3KkjHC7izdkKbV0B4U1iDn7kvz6shVI+HNW9M0Zjv035AVjCDBEQmDYivt6BVdBUo0ZRuT1WHK7QNB0qCGMmTYjT5sdl7TWHgGXhjhJmFzuK8IhB1Vvs+akTPROZRnA=
+      template:
+        metadata:
+          name: n8n
+          namespace: n8n

@@ -15,6 +15,14 @@
       "description": "Kubernetes control plane and GitOps engine get their own PRs.",
       "matchPackageNames": ["argo-cd", "kube-prometheus-stack"],
       "automerge": false
+    },
+    {
+      "description": "n8n tags its beta line with plain semver on Docker Hub, indistinguishable from stable. GitHub marks those releases as prereleases, which Renovate skips.",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["n8nio/n8n"],
+      "overrideDatasource": "github-releases",
+      "overridePackageName": "n8n-io/n8n",
+      "extractVersion": "^n8n@(?<version>.+)$"
     }
   ]
 }

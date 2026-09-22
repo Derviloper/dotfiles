@@ -1,0 +1,13 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: n8n-route
+  namespace: n8n
+spec:
+  routes:
+    - kind: Rule
+      match: Host(`{{ .Values.host }}`)
+      priority: 10
+      services:
+        - name: n8n
+          port: 80
