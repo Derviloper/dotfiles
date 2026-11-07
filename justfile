@@ -77,6 +77,11 @@ install host="server01":
 kubeconfig host="server01":
     ./scripts/get-kubeconfig.sh {{ host }}
 
+# Forward the API server to 127.0.0.1:6443, where the kubeconfig points. Leave
+# it running while using kubectl.
+tunnel host="server01":
+    ssh -N -L 6443:127.0.0.1:6443 {{ host }}
+
 # Fetch the sealed-secrets public cert into local/ (gitignored). Needed by `seal`.
 fetch-cert host="server01":
     mkdir -p local/{{ host }}

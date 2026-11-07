@@ -96,6 +96,21 @@ data:
     rtpstart={{ .Values.rtp.start }}
     rtpend={{ .Values.rtp.end }}
     strictrtp=yes
+  modules.conf: |
+    [modules]
+    autoload=yes
+    ; The image's own noloads; this file replaces its modules.conf.
+    noload = res_hep.so
+    noload = res_hep_pjsip.so
+    noload = res_hep_rtcp.so
+    noload = app_voicemail_imap.so
+    noload = app_voicemail_odbc.so
+    ; Unused, and each binds a UDP listener: IAX2 on 4569, DUNDi on 4520,
+    ; UNISTIM on 5000. The firewall drops those ports, but under hostNetwork
+    ; that drop would be the only thing in the way.
+    noload = chan_iax2.so
+    noload = pbx_dundi.so
+    noload = chan_unistim.so
   logger.conf: |
     [general]
 
@@ -103,3 +118,6 @@ data:
     ; To stdout, where k8s-monitoring ships it to Loki. `security` carries the
     ; failed-authentication events.
     console => notice,warning,error,security
+    ; The same events as a file on the node (the hostPath in deployment.yaml),
+    ; for fail2ban. The jail and the rotation live in hosts/server01/default.nix.
+    security => security

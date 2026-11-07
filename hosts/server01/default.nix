@@ -69,7 +69,43 @@
     };
 
     ntp.enable = true;
+
+    # Bans SIP scanners on the asterisk pod, which writes its security log here
+    # through a hostPath. Extends the stock [asterisk] jail (its filter, maxretry
+    # 10 in 10m, a ban on TCP and UDP). The filter matches every failed-auth
+    # event and neither ChallengeSent nor SuccessfulAuth -- checked with
+    # fail2ban-regex against this pod's log -- and the phones logged no failure
+    # in 30 days of Loki history. So a ban takes a wrong password, e.g. a handset
+    # after a reset.
+    fail2ban.jails.asterisk.settings = {
+      logpath = "/var/log/asterisk/security";
+      # The module defaults to the journal, which never sees container output.
+      backend = "auto";
+      port = 5160;
+      # Short for a misconfigured handset; modules/nixos/openssh.nix doubles it
+      # for scanners that come back.
+      bantime = "1h";
+    };
+
+    logrotate.settings.asterisk = {
+      files = "/var/log/asterisk/security";
+      frequency = "daily";
+      rotate = 7;
+      compress = true;
+      missingok = true;
+      notifempty = true;
+      # Asterisk holds the file open and never reopens it on its own.
+      copytruncate = true;
+    };
   };
+
+  # uid 1000 is the container's asterisk user, so the entrypoint's chown leaves
+  # this alone. The file must exist before the jail starts: fail2ban refuses to
+  # start at all over a missing logpath, which would take the sshd jail with it.
+  systemd.tmpfiles.rules = [
+    "d /var/log/asterisk 0755 1000 1000 -"
+    "f /var/log/asterisk/security 0644 1000 1000 -"
+  ];
 
   networking = {
     firewall = {
@@ -77,7 +113,9 @@
         22 # ssh
         80 # http
         443 # https
-        6443 # Kubernetes API Server
+        # Not 6443: the API server is cluster-admin and only ever needed from the
+        # admin's machine, so it goes through `just tunnel`. Pods still reach it
+        # through the 10.42/10.43 rules below.
         25565 # Minecraft
       ];
       # The asterisk pod runs with hostNetwork, so this chain is its entire

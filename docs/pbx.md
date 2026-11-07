@@ -12,8 +12,8 @@ internet. There is no trunk: it dials those two handsets and nothing else.
 | `601` | Milliwatt | steady 1004 Hz tone |
 
 Everything lives in `kubernetes/cluster01/asterisk/`, except the two firewall
-holes, which are in `hosts/server01/default.nix` and need `just deploy server01`
-rather than a git push.
+holes and the fail2ban jail, which are in `hosts/server01/default.nix` and need
+`just deploy server01` rather than a git push.
 
 ## Why it does not look like the other apps
 
@@ -29,6 +29,10 @@ rather than a git push.
   [secrets.md](secrets.md) intact.
 - **A non-standard SIP port.** 5060 attracts a constant REGISTER/OPTIONS flood.
   See the comment in `values.yaml` for how much this is and is not worth.
+- **A hostPath for the security log.** Asterisk writes its failed-auth events to
+  `/var/log/asterisk/security` on server01, where fail2ban on the node bans the
+  sender on UDP 5160. The 32-character passwords are what keep the PBX safe;
+  the jail cuts the flood out of the logs and Loki.
 
 ## Provisioning a Grandstream
 
@@ -110,3 +114,13 @@ kubectl -n asterisk exec deploy/asterisk -- asterisk -rx "core show channels"
 Endpoints are `Unavailable` until the phones register. If a call rings but has
 one-way or no audio, it is the RTP range every time: `rtp.conf` and
 `allowedUDPPortRanges` have to agree, and the NixOS side needs an actual deploy.
+
+A handset that registered fine and then goes silent after a reset or password
+change may have banned its home: a wrong password trips the jail within
+minutes. The first ban lasts an hour and doubles with every earlier ban of that
+address in any jail, SSH included, up to a week.
+
+```sh
+ssh server01 sudo fail2ban-client status asterisk
+ssh server01 sudo fail2ban-client set asterisk unbanip <home IP>
+```

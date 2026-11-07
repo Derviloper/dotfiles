@@ -18,10 +18,13 @@ a git push.
 
 ## Access
 
-Admin UIs are **not** published. Reach them over port-forwards:
+Neither the API server nor the admin UIs are published. The API server's port
+6443 is closed in the firewall, so kubectl goes through an SSH tunnel, and the
+UIs through port-forwards on top of that:
 
 ```sh
-just kubeconfig server01
+just kubeconfig server01   # once; points at 127.0.0.1:6443
+just tunnel server01       # leave running in another terminal
 
 kubectl -n argocd port-forward svc/argocd-server 8080:80
 kubectl -n traefik port-forward deploy/traefik 9000:9000
@@ -37,6 +40,19 @@ kubectl -n kubernetes-dashboard create token dashboard-admin --duration=1h
 There is deliberately no long-lived token Secret. The previous configuration
 shipped a legacy `kubernetes.io/service-account-token` bound to `cluster-admin`
 that never expired and could not be revoked without deleting the ServiceAccount.
+
+## Cloudflare in front
+
+Every public hostname is proxied by Cloudflare, and Traefik's `web` and
+`websecure` entrypoints refuse any connection that does not come from
+Cloudflare's edge (the `cloudflare-only` middleware in
+`kubernetes/cluster01/traefik/values.yaml`). So:
+
+- A new hostname must be created **proxied** (orange cloud). "DNS only" sends
+  visitors straight to the origin, where they get a 403.
+- Cloudflare's ranges change rarely, but they do change; refresh the list from
+  [cloudflare.com/ips](https://www.cloudflare.com/ips/) when they announce it.
+  It is the same list that decides whose `X-Forwarded-For` Traefik trusts.
 
 ## n8n
 
@@ -60,7 +76,9 @@ Two apps are not reached through Traefik, and both need a matching hole in
 git push:
 
 - `minecraft` -- TCP 25565, exposed the ordinary way with a `LoadBalancer`
-  Service served by k3s' klipper.
+  Service served by k3s' klipper. Whitelisted: to let someone in, add their
+  name to `minecraftServer.whitelist` in its `values.yaml` and push. Names added
+  in-game are dropped on the next restart.
 - `asterisk` -- UDP 5160 plus the RTP range 10000-10099, exposed with
   `hostNetwork: true` because a Service cannot express a port range. See
   [pbx.md](pbx.md).

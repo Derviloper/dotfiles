@@ -77,6 +77,8 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/asterisk
+            - name: log
+              mountPath: /var/log/asterisk
           livenessProbe:
             # Asterisk serves no HTTP; the control socket is the only health signal.
             exec:
@@ -97,3 +99,10 @@ spec:
         - name: overlay-secret
           secret:
             secretName: asterisk-pjsip-auth
+        # The security log, on the node where fail2ban reads it. OrCreate so this
+        # syncs before or after the NixOS deploy that also creates it; either way
+        # the entrypoint chowns it to the container's asterisk user.
+        - name: log
+          hostPath:
+            path: /var/log/asterisk
+            type: DirectoryOrCreate

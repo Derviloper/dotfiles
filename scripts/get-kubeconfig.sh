@@ -27,17 +27,7 @@ trap 'rm -f "$tmp"' EXIT
 
 rsync -azP --rsync-path="sudo rsync" "$server:/etc/rancher/k3s/k3s.yaml" "$tmp"
 
-# k3s writes the loopback address, correct only on the node itself. Substitute
-# whatever ssh resolves to, including ~/.ssh/config.local where server01's real
-# address lives.
-hostname=$(ssh -G "$server" | awk '/^hostname / { print $2 }')
-[ -n "$hostname" ] || {
-  echo "could not resolve a hostname for '$server' from ssh config" >&2
-  exit 1
-}
-sed -i "s/127.0.0.1/$hostname/g" "$tmp"
-
-# Move into place only after the rewrite, so an interrupted transfer cannot
-# leave a kubeconfig pointing at 127.0.0.1.
+# k3s writes 127.0.0.1:6443, which is left alone: the firewall does not expose
+# the API server, so it is reached through `just tunnel`, which listens there.
 install -m 600 "$tmp" "$kubeconfig"
-echo "Wrote $kubeconfig for $server ($hostname)."
+echo "Wrote $kubeconfig for $server. Run 'just tunnel $server' before kubectl."

@@ -34,8 +34,6 @@ resources:
 #   media_encryption=sdes on the endpoints.
 # - Persistence: no PVC, so a restart drops registrations and the phones
 #   re-register within their 2 minute expiry. No voicemail, no CDR to keep.
-# - fail2ban: the security log lives in the pod, and with no trunk a brute force
-#   at worst rings the other handset.
 extraObjects:
   - apiVersion: bitnami.com/v1alpha1
     kind: SealedSecret

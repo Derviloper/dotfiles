@@ -5,8 +5,18 @@ minecraftServer:
   serviceType: LoadBalancer
   memory: 4G
   motd: "\\u00a7bDerviloper\\u00a76 Minecraft Server\\u00a7c \\u2665"
+  # Comma-separated. Without a whitelist any paid account can join, and scanners
+  # find the server: six strangers joined in 30 days, one a bot that stayed a
+  # second. Setting this also makes the image enforce it, kicking anyone online
+  # who is not listed. IP bans are no substitute: klipper hands every player to
+  # the server as 10.42.0.1.
+  whitelist: "Derviloper"
 extraEnv:
   USE_MEOWICE_FLAGS: "TRUE"
+  # The image's default only ever adds names, so deleting one above would not
+  # take that player's access away. This makes the list above the whole
+  # whitelist, and drops in-game `/whitelist add`s on the next restart.
+  EXISTING_WHITELIST_FILE: "SYNCHRONIZE"
 # Deliberately NO memory limit, unlike the other apps here. The request is what
 # matters: this is the node's largest consumer, and kubelet evicts pods over
 # their request first, so declaring 4Gi keeps it from ranking alongside the

@@ -98,8 +98,8 @@ EOT
 chmod 600 ~/.ssh/config.local
 ```
 
-`deploy-rs` and `scripts/get-kubeconfig.sh` both go through ssh, so they pick
-this up automatically.
+`deploy-rs`, `scripts/get-kubeconfig.sh` and `just tunnel` all go through ssh,
+so they pick this up automatically.
 
 ## homelab
 

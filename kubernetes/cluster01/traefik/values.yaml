@@ -8,6 +8,13 @@ ports:
   web:
     port: 80
     nodePort: 30000
+    # Every hostname is proxied by Cloudflare, yet over a third of requests came
+    # straight to the origin IP -- scanners, and anyone else who knows the IP can
+    # skip Cloudflare by sending the right Host header. This refuses any
+    # connection that is not from Cloudflare's edge. A hostname switched to
+    # "DNS only" in Cloudflare gets a 403 until it is proxied again.
+    middlewares: &cloudflare-only
+      - traefik-cloudflare-only@kubernetescrd
     redirections:
       entryPoint:
         to: websecure
@@ -52,7 +59,19 @@ ports:
             - "*.derviloper.de"
     forwardedHeaders:
       trustedIPs: *cloudflare-ips
+    middlewares: *cloudflare-only
 extraObjects:
+  # No ipStrategy, so it checks the connecting address rather than
+  # X-Forwarded-For. That is the real peer because the Service keeps
+  # externalTrafficPolicy: Local below.
+  - apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: cloudflare-only
+      namespace: traefik
+    spec:
+      ipAllowList:
+        sourceRange: *cloudflare-ips
   - apiVersion: bitnami.com/v1alpha1
     kind: SealedSecret
     metadata:
