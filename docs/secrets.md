@@ -103,8 +103,8 @@ so they pick this up automatically.
 
 ## homelab
 
-`hosts/homelab/secrets/sops.yaml` holds two values, keyed to homelab's existing
-host key so its identity is unchanged:
+`hosts/homelab/secrets/sops.yaml` is keyed to homelab's existing host key so
+its identity is unchanged, and holds:
 
 - `haos/mac` -- the Home Assistant VM's MAC, pinned so the router's DHCP
   reservation survives a rebuild and Home Assistant returns on the same address.
@@ -112,6 +112,15 @@ host key so its identity is unchanged:
   rather than refusing to create the VM.
 - `tailscale/oauthSecret` -- wired to `services.tailscale.authKeyFile`, so a
   freshly installed homelab joins the tailnet without a manual `tailscale up`.
+- `influxdb2/{adminPassword,adminToken,homeassistantToken}` -- random values.
+  The password and `homeassistantToken` are re-applied on every service start,
+  so editing one here and deploying rotates it; `homeassistantToken` is also
+  entered into Home Assistant (docs/homelab-haos.md), so update it there too.
+  **`adminToken` cannot be rotated this way**: it only seeds the first
+  `influx setup`, and provisioning authenticates with it, so changing it here
+  afterwards makes `influxdb2.service` fail. To change it, create a new
+  operator token in the InfluxDB UI, store that here, deploy, then delete the
+  old one.
 
 ### Setting the Tailscale secret
 

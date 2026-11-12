@@ -146,7 +146,7 @@ let
     virt-install --connect qemu:///system \
       --name haos --description "Home Assistant OS" \
       --os-variant generic \
-      --memory 12288 --vcpus 4 --cpu host-passthrough --machine q35 \
+      --memory 4096 --vcpus 4 --cpu host-passthrough --machine q35 \
       --disk path="$img",format=qcow2,bus=scsi \
       --controller type=scsi,model=virtio-scsi \
       --network "$net" \

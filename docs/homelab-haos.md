@@ -36,7 +36,7 @@ sudo chown root:root /var/lib/libvirt/images/haos.qcow2
 virt-install --connect qemu:///system \
   --name haos --description "Home Assistant OS" \
   --os-variant generic \
-  --memory 12288 --vcpus 4 --cpu host-passthrough --machine q35 \
+  --memory 4096 --vcpus 4 --cpu host-passthrough --machine q35 \
   --disk path=/var/lib/libvirt/images/haos.qcow2,format=qcow2,bus=scsi \
   --controller type=scsi,model=virtio-scsi \
   --network bridge=br0,model=virtio \
@@ -45,9 +45,24 @@ virt-install --connect qemu:///system \
 virsh --connect qemu:///system autostart haos
 ```
 
-`--memory`/`--vcpus` are sized for this host (16 GiB / 4-core N150); adjust to
-taste. Resize later without recreating the VM via `virsh setvcpus`/`setmem`
-(`--config`) or `virsh edit haos`, then reboot the guest.
+`--memory`/`--vcpus` are sized for this host (16 GiB / 4-core N150). Home
+Assistant's working set is about 2 GiB, so 4 GiB leaves it headroom and the
+rest to the host's own services (InfluxDB). Without the cap the guest fills
+every GiB it is given with page cache, which the host never gets back.
+
+Resize later without recreating the VM. To shrink, lower the current size
+before the maximum; to grow, the other way round:
+
+```sh
+virsh --connect qemu:///system setmem    haos 4GiB --config
+virsh --connect qemu:///system setmaxmem haos 4GiB --config
+```
+
+Then shut the guest down and start it again. A reboot from inside Home Assistant
+keeps the same QEMU process, and with it the old size. `setmem --live` resizes a
+running guest right away through the memory balloon, but only up to the maximum
+it was started with. `setvcpus --config` likewise needs that shutdown and
+start.
 
 ## 3 Reach Home Assistant
 
@@ -91,6 +106,38 @@ the guest to bring the integration back.
 The host runs Glances on port 61208, reachable from the LAN only. In Home
 Assistant add the **Glances** integration with host `homelab.local` (or the
 host's IP), port `61208`, no username/password, SSL off.
+
+## 6 Long-term history (InfluxDB)
+
+The host runs InfluxDB 2 on port 8086, reachable from the LAN only. Its state
+lives on the external USB HDD (`/mnt/hdd/influxdb2`, bind-mounted onto
+`/var/lib/influxdb2`). The org `homelab`, the bucket `homeassistant` (unlimited
+retention) and a write-only token for Home Assistant are provisioned from sops,
+so nothing is clicked together on the InfluxDB side.
+
+1. Print the token, and the admin password for the web UI (user `admin`):
+
+   ```sh
+   sops decrypt --extract '["influxdb2"]["homeassistantToken"]' hosts/homelab/secrets/sops.yaml
+   sops decrypt --extract '["influxdb2"]["adminPassword"]' hosts/homelab/secrets/sops.yaml
+   ```
+
+1. Home Assistant wants the organization **ID**, not its name: log in at
+   <http://homelab.local:8086> and copy it from the URL, after `/orgs/`.
+
+1. In Home Assistant add the **InfluxDB** integration, pick 2.x, and enter URL
+   `http://homelab.local:8086`, that organization ID, bucket `homeassistant` and
+   the token.
+
+By default every entity's state changes are written. Include/exclude filters
+are YAML-only (`influxdb:` in `configuration.yaml`).
+
+If the disk is missing at boot, `influxdb2.service` refuses to start instead of
+initialising an empty database on the SSD; the rest of the host, HAOS included,
+boots normally. Reconnect it and `sudo systemctl start influxdb2`, which mounts
+it first. The disk holds the only copy of the history. A replacement needs
+ext4, an `influxdb2/` directory at its root (the bind-mount source), and its
+UUID in `hosts/homelab/default.nix`.
 
 ## Maintenance
 
