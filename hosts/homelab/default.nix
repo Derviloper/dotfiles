@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   imports = [
     ./disko.nix
@@ -29,6 +30,12 @@
 
     firewall.allowedTCPPorts = [ 22 ];
   };
+
+  # Host metrics for Home Assistant's Glances integration. The API has no auth
+  # and lists every process's command line, so it is opened on the LAN bridge
+  # only -- the HAOS VM reaches it there -- not on tailscale0.
+  services.glances.enable = true;
+  networking.firewall.interfaces.br0.allowedTCPPorts = [ config.services.glances.port ];
 
   services.avahi = {
     enable = true;

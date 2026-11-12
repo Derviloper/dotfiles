@@ -86,6 +86,12 @@ Without it (the default, `mandatory`), an absent USB radio blocks the VM from
 starting. The dongle is only re-attached on VM start, so reconnect it and restart
 the guest to bring the integration back.
 
+## 5 Host metrics (Glances)
+
+The host runs Glances on port 61208, reachable from the LAN only. In Home
+Assistant add the **Glances** integration with host `homelab.local` (or the
+host's IP), port `61208`, no username/password, SSL off.
+
 ## Maintenance
 
 ```sh
