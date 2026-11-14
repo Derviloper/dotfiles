@@ -21,6 +21,15 @@
     firewall.allowedTCPPorts = [ 22 ];
   };
 
+  # Published ports skip the firewall above -- docker DNATs them in prerouting,
+  # before the input chain ever sees the packet -- so a bare `-p 8080:80` would
+  # quietly open 8080 to the LAN. Loopback by default keeps the rule; `ssh -L`
+  # still reaches it, and `-p 0.0.0.0:8080:80` remains a deliberate opt-in.
+  virtualisation.docker = {
+    enable = true;
+    daemon.settings.ip = "127.0.0.1";
+  };
+
   # PasswordAuthentication is off, so the key in profiles/base.nix -- the same one
   # the servers take -- is the only way in, `ssh -L` included.
   users.users.${username} = {
@@ -29,6 +38,9 @@
       "wheel"
       "pipewire"
       "dialout"
+      # Root-equivalent, but so is wheel here: profiles/base.nix drops sudo's
+      # password prompt.
+      "docker"
     ];
     # Empty until first login: `just bootstrap` runs passwd right after install,
     # and initialHashedPassword applies only at user creation, so the real one
