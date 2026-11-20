@@ -31,7 +31,8 @@
     (clock-widget)
     (metrics-widget)))
 
-(defwindow bar
+; scale is GDK_SCALE, passed in by bspwmrc.
+(defwindow bar [scale]
   :monitor 0
   :stacking "fg"
   :windowtype "dock"
@@ -40,5 +41,7 @@
                       :width "100%"
                       :height "32px"
                       :anchor "top center")
-  :reserve (struts :side "top" :distance "32px")
+  ; eww scales the bar by GDK_SCALE but not its strut, so this is the height
+  ; above times the scale.
+  :reserve (struts :side "top" :distance "${32 * scale}px")
   (main))

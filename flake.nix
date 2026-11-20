@@ -41,6 +41,13 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Per-machine settings that stay out of git. This stub is empty; the rebuild
+    # recipes in the justfile swap in the gitignored local/nixos when it exists.
+    local-settings = {
+      url = "path:./lib/local-settings";
+      flake = false;
+    };
   };
 
   outputs =

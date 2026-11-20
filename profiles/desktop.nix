@@ -5,6 +5,8 @@
     ./base.nix
     ../modules/nixos/desktop/file-manager.nix
     ../modules/nixos/desktop/fonts.nix
+    # Off unless local.hidpi.scale is set, normally from local/nixos/<host>.nix.
+    ../modules/nixos/desktop/hidpi.nix
     ../modules/nixos/desktop/sound.nix
     ../modules/nixos/desktop/xserver.nix
     ../modules/nixos/nix-ld.nix

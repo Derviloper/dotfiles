@@ -10,13 +10,19 @@ super + b
 super + e
     thunar
 
+super + space
+    rofi -show drun
+
+super + Tab
+    rofi -show window
+
 # close and kill
 super + {_,shift + }q
 	bspc node -{c,k}
 
 # set the window state
-super + {t,f}
-	bspc node -t {tiled,fullscreen}
+super + {t,shift + t,f}
+	bspc node -t {tiled,floating,fullscreen}
 
 # focus or send to the given desktop
 super + {_,shift + }{1-9,0}

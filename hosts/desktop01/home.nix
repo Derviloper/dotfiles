@@ -7,6 +7,7 @@
     ../../modules/home/ghostty.nix
     ../../modules/home/git.nix
     ../../modules/home/live-config.nix
+    ../../modules/home/rofi
     ../../modules/home/ssh.nix
     ../../modules/home/vscode.nix
   ];

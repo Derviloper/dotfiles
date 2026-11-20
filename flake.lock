@@ -116,6 +116,18 @@
         "type": "github"
       }
     },
+    "local-settings": {
+      "flake": false,
+      "locked": {
+        "path": "./lib/local-settings",
+        "type": "path"
+      },
+      "original": {
+        "path": "./lib/local-settings",
+        "type": "path"
+      },
+      "parent": []
+    },
     "nix-vm-test": {
       "inputs": {
         "nixpkgs": [
@@ -227,6 +239,7 @@
         "disko": "disko",
         "git-hooks": "git-hooks",
         "home-manager": "home-manager",
+        "local-settings": "local-settings",
         "nixos-anywhere": "nixos-anywhere",
         "nixpkgs": "nixpkgs",
         "sops-nix": "sops-nix",

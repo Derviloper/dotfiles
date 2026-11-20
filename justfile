@@ -1,3 +1,7 @@
+# Per-machine settings from the gitignored local/nixos, when there are any; see
+# lib/local-settings/README.md. Only the build and rebuild recipes pass this.
+local_settings := if path_exists("local/nixos") == "true" { "--override-input local-settings path:./local/nixos" } else { "" }
+
 _default:
     @just --list --unsorted
 
@@ -49,7 +53,7 @@ fmt:
 
 # Build a host's toplevel without activating it.
 build host:
-    nix build ".#nixosConfigurations.{{ host }}.config.system.build.toplevel"
+    nix build ".#nixosConfigurations.{{ host }}.config.system.build.toplevel" {{ local_settings }}
 
 # Show what a rebuild would actually change on this machine.
 diff host: (build host)
@@ -57,10 +61,10 @@ diff host: (build host)
 
 # Rebuild the local machine. Use `boot` for X11/display-manager changes.
 switch:
-    sudo nixos-rebuild switch --flake ".#$(hostname)"
+    sudo nixos-rebuild switch --flake ".#$(hostname)" {{ local_settings }}
 
 boot:
-    sudo nixos-rebuild boot --flake ".#$(hostname)"
+    sudo nixos-rebuild boot --flake ".#$(hostname)" {{ local_settings }}
 
 # Dry-run a remote activation. Always run this before `deploy`.
 dry-deploy host:

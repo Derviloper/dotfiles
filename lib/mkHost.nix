@@ -6,6 +6,11 @@
   system,
   username,
 }:
+let
+  # This machine's own settings for the host, kept out of git; see
+  # lib/local-settings/README.md.
+  localSettings = "${inputs.local-settings}/${hostname}.nix";
+in
 inputs.nixpkgs.lib.nixosSystem {
   specialArgs = { inherit inputs hostname username; };
 
@@ -43,5 +48,6 @@ inputs.nixpkgs.lib.nixosSystem {
         };
       };
     }
-  ];
+  ]
+  ++ inputs.nixpkgs.lib.optional (builtins.pathExists localSettings) localSettings;
 }

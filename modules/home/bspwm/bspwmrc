@@ -2,12 +2,17 @@
 
 sxhkd &
 
+# The root window otherwise keeps X's core "X" cursor, which ignores XCURSOR_*.
+xsetroot -cursor_name left_ptr
+
 eww daemon &
-eww open bar &
+# eww.yuck can't read the environment, and the bar's strut needs the scale.
+eww open bar --arg scale="${GDK_SCALE:-1}" &
 
 bspc monitor -d 1 2 3 4 5 6 7 8 9 10
 
-bspc config border_width          1
+# bspwm sizes are device pixels, so scale them like GTK is.
+bspc config border_width          $((1 * ${GDK_SCALE:-1}))
 bspc config window_gap            0
 bspc config normal_border_color   "#000000"
 bspc config focused_border_color  "#008000"

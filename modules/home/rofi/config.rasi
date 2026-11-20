@@ -1,0 +1,85 @@
+configuration {
+  modi: "drun,run,window";
+  show-icons: true;
+  terminal: "ghostty";
+  drun-display-format: "{name}";
+  font: "Roboto 12";
+  // rofi ignores GDK_SCALE, and Xft.dpi stays at 96 on purpose, so
+  // modules/nixos/desktop/hidpi.nix exports its own ROFI_DPI.
+  dpi: env(ROFI_DPI, 96);
+}
+
+// dpi only scales text, em and mm, not px, so sizes below are in mm.
+// 1px at 96 dpi is 0.2646mm. rofi truncates to whole pixels, so each value is
+// rounded up a little: 3.18mm is 12px at 96 dpi and 24px at 192.
+
+// Colours match modules/home/eww/eww.scss.
+* {
+  bg: #000000;
+  fg: #cccccc;
+  muted: #555555;
+  accent: #008000;
+
+  background-color: transparent;
+  text-color: @fg;
+}
+
+window {
+  width: 158.76mm;
+  background-color: @bg;
+  border: 0.53mm;
+  border-color: @muted;
+  padding: 3.18mm;
+}
+
+mainbox {
+  children: [ inputbar, listview ];
+  spacing: 3.18mm;
+}
+
+inputbar {
+  children: [ prompt, entry ];
+  spacing: 2.12mm;
+  // rofi's built-in theme sets 1px.
+  padding: 0.27mm;
+}
+
+prompt {
+  text-color: @accent;
+}
+
+entry {
+  text-color: @fg;
+  placeholder: "Search";
+  placeholder-color: @muted;
+}
+
+listview {
+  lines: 8;
+  scrollbar: false;
+  // The built-in theme's dashed separator, padding and spacing (2px each).
+  border: 0.53mm dash 0 0;
+  padding: 0.53mm 0 0;
+  spacing: 0.53mm;
+}
+
+element {
+  padding: 1.59mm 2.12mm;
+  spacing: 2.12mm;
+}
+
+element selected {
+  background-color: @accent;
+}
+
+element-icon {
+  size: 1.2em;
+}
+
+element-text {
+  vertical-align: 0.5;
+}
+
+element-text selected {
+  text-color: @bg;
+}
